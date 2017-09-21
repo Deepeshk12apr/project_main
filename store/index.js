@@ -16,7 +16,14 @@ const store = new Vuex.Store({
     fbimg:null,
     from_doc:0,
     isguest:null,
-    cart: []
+    cart: [],
+    clientY:0,
+    clientX:0,
+    childdialog:false,
+    productlist:null,
+    addressid:null,
+    billaddressid:null,
+    ordernumber:null
   },
   mutations: {
     setUser(state,text){
@@ -38,6 +45,9 @@ const store = new Vuex.Store({
       state.guestToken = text 
       state.isguest = true
     },
+    setproductlist(state,text){
+      state.productlist = text 
+    },
     addtoCart(state,text){
       state.cart = state.cart.concat(text)
     },
@@ -50,6 +60,18 @@ const store = new Vuex.Store({
     setFromDoc(state,text){
       state.from_doc = text 
     },
+    setclientY(state,text){
+      state.clientY = text 
+    },
+    setaddressid(state,text){
+      state.addressid = text 
+    },
+    setbilladdressid(state,text){
+      state.billaddressid = text 
+    },
+    setordernumber(state,text){
+      state.ordernumber = text 
+    },
   },
   actions: {    
     setUser({ commit },context){
@@ -61,14 +83,29 @@ const store = new Vuex.Store({
     setFromDoc({ commit },context){
       commit('setFromDoc',context)
     },
+    setclientY({ commit },context){
+      commit('setclientY',context)
+    },
     setGuestToken({ commit },context){
       commit('setGuestToken',context)
+    },
+    setproductlist({ commit },context){
+      commit('setproductlist',context)
     },
     addtoCart({ commit },context){
       commit('addtoCart',context)
     },
     updateCart({ commit },context){
       commit('updateCart',context)
+    },
+    setaddressid({ commit },context){
+      commit('setaddressid',context)
+    },
+    setbilladdressid({ commit },context){
+      commit('setbilladdressid',context)
+    },
+    setordernumber({ commit },context){
+      commit('setordernumber',context)
     }
   },
    getters: {
@@ -79,6 +116,9 @@ const store = new Vuex.Store({
       } else {
         return  'Token  ' + state.guestToken
       }      
+    },
+    getaddressid :state => {
+      return state.addressid
     }
   }
 })

@@ -6,10 +6,9 @@ export default function ({ isServer, store, req }) {
 
   if (isServer && !req) return
 	const fd = isServer ? getfrom_docFromCookie(req) : getfrom_docFromLocalStorage()
-	console.log("fd : "+ fd)
 
 	if(fd != undefined){
-		store.commit('setFromDoc',JSON.parse(decodeURIComponent(cart)))
+		store.commit('setFromDoc',JSON.parse(decodeURIComponent(fd)))
 	}
  
 }

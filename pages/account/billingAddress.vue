@@ -4,16 +4,16 @@
 		<nuxt-link to="/account/myaccount">
 		<v-icon dark>home</v-icon>
 		</nuxt-link>
-		<p>Delivery address</p>
+		<p>Billing address</p>
 	</div>
 	<p>{{getaddresslist}}</p>
 
-	<p>{{addressid}}</p>
+	<!-- <p>{{$store.state}}</p> -->
 	<!-- <p>{{$store.state}}</p> -->
 
 	<v-expansion-panel expand>
-	<!-- <v-radio-group v-model="addressid" :mandatory="false"> -->
-    <v-expansion-panel-content v-for="(item,i) in address" :key="i" v-bind:value="false">
+	<!-- <v-radio-group v-model="billaddressid" :mandatory="false"> -->
+    <v-expansion-panel-content v-for="(item,i) in address" :key="i" v-bind:value="address.length === 1">
       <div slot="header">Address {{i+1}}</div>
       <v-card>
         <v-card-text class="grey lighten-3">
@@ -24,13 +24,13 @@
         	<label>country :</label>{{item.pin_number.country}}<br>
         	<label>pincode :</label>{{item.pin_number.pincode}}<br>
 			<label>phone :</label>{{item.phone_number.phone}}
-			<v-radio @change="saveAddressid" :label="item.address" v-model="addressid" :value="item.id"></v-radio>
+			<v-radio @change="savebilladdressid" :label="item.address" v-model="billaddressid" :value="item.id"></v-radio>
         </v-card-text>
       </v-card>
     </v-expansion-panel-content>
     <!-- </v-radio-group> -->
     </v-expansion-panel>
-    <v-checkbox v-bind:label="`same as billing address: ${isSame.toString()}`" v-model="isSame" light></v-checkbox>
+    <!-- <v-checkbox v-bind:label="`same as billing address: ${isSame.toString()}`" v-model="isSame" light></v-checkbox> -->
 
     <form v-if="addaddress"
     		id="address">
@@ -65,20 +65,23 @@
 		bill_address
 		shipping_address
      -->
-    <v-list class="add" @click.native="showaddaddress()">
-          <v-list-tile-content>
+ <!--    <v-list class="add">
+        <v-list-tile 
+          v-for="(item, i) in 1"
+          :key="i"
+        >
+          <v-list-tile-content @click.native="showaddaddress()">
             <v-list-tile-title>Add new address</v-list-tile-title>
           </v-list-tile-content>
-   </v-list>
+          <v-list-tile-action>
+            <v-icon>bubble_chart</v-icon>
+          </v-list-tile-action>
+          </v-list-tile>
+   </v-list> -->
 
-   <v-btn @click.native="next(isSame)" class="green" block secondary >Next</v-btn><br><br>
-
-<!-- <nuxt-link v-if="isSame" to="/account/billingaddress">
-		<v-btn class="green" block secondary >Next</v-btn><br><br>
-	</nuxt-link>
    	<nuxt-link v-else to="/checkout">
 		<v-btn class="green" block secondary >Next</v-btn><br><br>
-	</nuxt-link> -->
+	</nuxt-link>
 
  </main>
 </template>
@@ -96,7 +99,7 @@ import axios from 'axios'
 				fulladdress:'',
 				hasaddress: false,
 				pincodeid:null,
-				addressid:null,
+				billaddressid:"rad_addrress",
 				addaddress:false
 			}
 		},
@@ -117,31 +120,16 @@ import axios from 'axios'
 			}
 		},
 		methods : {
-			next: function(is_same){
-				let vm = this
-				if(!vm.addressid){
-					alert("select address")
-					return 0
-				}
-				if(is_same){
-					this.$store.commit('setbilladdressid',vm.addressid)
-					vm.$nuxt.$router.replace('/checkout')
-				} else {
-					vm.$nuxt.$router.replace('/account/billingaddress')
-				}
-				
-			},
-			saveAddressid: function(){
+			savebilladdressid: function(){
 				let vm = this
 				console.log(this.$store.state)
-				this.$store.commit('setaddressid',vm.addressid)
-				// this.$store.dispatch('setaddressid',{addressid : vm.addressid})
-				console.log(this.$store.state.addressid)
-				//this.$store.getter('getaddressid')
+				this.$store.commit('setbilladdressid',vm.billaddressid)
+				// this.$store.dispatch('setbilladdressid',{billaddressid : vm.billaddressid})
+				console.log(this.$store.state.billaddressid)
+				//this.$store.getter('getbilladdressid')
 			},
 			showaddaddress :function(){
 				this.addaddress = true
-				console.log("addaddress :"+this.addaddress)
 			},
 			validatepincode : function() {
 				if(this.pincode.length == 6){

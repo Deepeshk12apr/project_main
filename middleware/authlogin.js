@@ -10,7 +10,7 @@ export default function ({ isServer, store, req }) {
 	const guser = isServer ? getguestTokenFromCookie(req) : getguestTokenFromLocalStorage()
 	//const arr = user.replace('{').replace('}').split('%22').join('').split('%2C').join('/').split('/');
 	
-	console.log("User : "+ user)
+	// console.log("User : "+ user)
 	const anonymus = {
 			authentication_token: "",
 			email:"default",
@@ -21,15 +21,15 @@ export default function ({ isServer, store, req }) {
 	}
 	
 	if(guser){
-		console.log(guser)
+		// console.log(guser)
 		store.commit('setGuestToken',guser)
 	}
 
 	if(user != undefined ){
-		console.log("user : "+ JSON.parse(decodeURIComponent(user)))
+		// console.log("user : "+ JSON.parse(decodeURIComponent(user)))
 		store.commit('setUser', JSON.parse(decodeURIComponent(user)))		
 	} else {
-		console.log(user)
+		// console.log(user)
 		store.commit('setUser',anonymus)
 	}
 	///const loggedUser = getUserFromLocalStorage()

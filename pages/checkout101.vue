@@ -1,7 +1,9 @@
 <template>
 	<main>
-<!-- 	<div>{{products}}</div> -->
-	<div class="title">Your Cart  ({{products.items.length}} items)</div><br>
+	<!-- <div>{{products}}</div> -->
+	<div class="headline">Review order</div>
+	<br>
+	<div class="title">Your Cart  ({{products.items.items.length}} items)</div><br>
 	<div v-for="item in products.items.items">
 	 <v-flex xs12>
             <v-card class="white darken-2 grey--text">
@@ -24,9 +26,6 @@
 				      <v-breadcrumbs-item>{{ item.quantity }}</v-breadcrumbs-item>
     				</v-breadcrumbs>
                     </div>
-                    <div class="dy-btn">
-              			<v-btn small light>Edit</v-btn>
-		            </div>
 		            <div class="dy-btn">
 		             	<v-btn @click.native='removeitem()' small light>Remove</v-btn>
 		            </div>
@@ -37,8 +36,13 @@
      </v-flex>	
      <br>
 	</div>
+		<label>Shipping charge</label>
+		<div class='title tp'>${{products.items.shipping_charge}}</div><br><br>
+		<label>Discounted price</label>
+		<div class='title tp'>${{products.items.discounted_price}}</div><br><br>
 		<label>Total price</label>
 		<div class='title tp'>${{products.items.total_price}}</div>
+		
 	<nuxt-link v-if='this.$store.state.token.length > 1 ' to="account/address">
 		<v-btn class="green" block secondary >Next</v-btn><br><br>
 	</nuxt-link>
@@ -115,7 +119,7 @@ export default {
 <style>
 	.tp{
 		float: right;
-		padding: 15px;
+		/*padding: 15px;*/
 	}
 	.bc
 	{

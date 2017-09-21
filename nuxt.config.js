@@ -19,6 +19,27 @@ module.exports = {
       { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' }
     ]
   },
+    modules: [
+    // Simple usage
+    '@nuxtjs/component-cache',
+    
+    // With options
+    ['@nuxtjs/component-cache', { maxAge: 1000 * 60 * 60 }],
+  ],
+   render: {
+    bundleRenderer: {
+      cache: require('lru-cache')({
+        max: 1000,
+        maxAge: 1000 * 60 * 15
+      })
+    }
+  },
+  //   scrollBehavior: function (to, from, savedPosition) {
+  //     console.log("from congig" + savedPosition)
+  //     console.log(savedPosition)
+  //     return { x: 0, y: 500 }
+  //   }
+  // },
   /*
   ** Customize the progress-bar color
   */
@@ -27,10 +48,13 @@ module.exports = {
   ** Build configuration
   */
   build: {
-    vendor: ['vuetify']
+    vendor: ['vuetify','vue-touch','vue-keep-scroll-position','~/mixins/myMixin']
   },
-  plugins: ['~plugins/vuetify.js','~plugins/vue-instantsearch'],
+  plugins: ['~plugins/vuetify.js','~plugins/event-hub.js',
+            { src: '~/plugins/vue-touch', ssr: false },
+            { src: '~/plugins/vue-keep-scroll-position', ssr: false }],
   css: [
     { src: '~assets/style/app.styl', lang: 'styl' }
   ]
+
 }

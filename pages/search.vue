@@ -4,13 +4,14 @@
 	  <p v-for="item in list">
 	    <span v-text="item.title"></span>
 	  </p>
-	  <infinite-loading :on-infinite="onInfinite" ref="infiniteLoading"></infinite-loading>
+	  <infinite-loading :on-infinite="onInfinite" ref="InfiniteLoading_mob"></infinite-loading>
 	</div>
   </main>
 </template>
 
 <script>
-import InfiniteLoading from '../components/InfiniteLoading.vue'
+// import InfiniteLoading_mob from '../components/InfiniteLoading_mob.vue'
+import InfiniteLoading_mob from '../components/InfiniteLoading.vue'
 import axios from 'axios'
 
 export default {
@@ -28,7 +29,7 @@ export default {
     //       temp.push(i);
     //     }
     //     this.list = this.list.concat(temp);
-    //     this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+    //     this.$refs.InfiniteLoading_mob.$emit('$InfiniteLoading_mob:loaded');
     //   }, 1000);
     // },
     onInfinite() {
@@ -41,14 +42,14 @@ export default {
       .then((res) => {
           //callback(null, { products: res.data.data[0].products })
           	vm.list = vm.list.concat(res.data.data[0].products)
-          	vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+          	vm.$refs.InfiniteLoading_mob.$emit('$InfiniteLoading_mob:loaded');
           	fd = fd + 20
           	this.$store.commit('setFromDoc',fd)
       })
     },
   },
   components: {
-    InfiniteLoading,
+    InfiniteLoading_mob,
   },
  	middleware : ['infinitscroll']
 }

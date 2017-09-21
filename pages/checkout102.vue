@@ -1,6 +1,6 @@
 <template>
 	<main>
-	<div class='inlineflex'>
+	<div class='inlineflex' v-if="products">
 		<div class="title">Your Cart  ({{products.items.items.length}} items)</div>
 		<div class="title price">{{products.items.total_price}}</div>
 	</div>
@@ -9,6 +9,7 @@
        single-line
        append-icon="email"
        v-model="email"
+       required
      ></v-text-field>
      <div v-if="hasacc">
      			<v-text-field
@@ -47,6 +48,10 @@
 import axios from 'axios'
 	export default{
 		asyncData ({ store,params }, callback) {
+			if(!store.getters.getToken){
+				alert('need to contiue as guest')
+				return 0
+			} 
 		  	let config = { Authorization : store.getters.getToken.toString() }
 		  	console.log(config)
 	    	 axios.get('http://52.52.8.87/api/v2/cart', { headers: config })
@@ -60,15 +65,19 @@ import axios from 'axios'
 		data(){
 			return{
 				hasacc: false,
+				products:null,
 				email:null,
 				e1: true,
 		        name:'deepesh',
-		        email: 'deepesh12apr@gmail.com',
+		        email: '',
 		        password:'12April1992'
 			}
 		},
 		methods:{
 			cag:function(){
+				if(!this.email){
+					alert('plz enter email')
+				}
 				let vm = this
 				console.log('continue as guest')
 			let config = { Authorization : 'Token '+ vm.$store.state.guestToken }	
@@ -76,6 +85,7 @@ import axios from 'axios'
 			 return axios.post(`http://52.52.8.87/api/v2/user/continue-as-guest/`,{email: this.email}, { headers: config })
 		        .then((res) => {
 		          	console.log(res.data)
+		          	vm.$nuxt.$router.replace('/account/address')
 		          }
 		        ).catch((e) => {
 		          console.log(e.message)
@@ -119,3 +129,4 @@ import axios from 'axios'
 		float: right;
 	}
 </style>
+

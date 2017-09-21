@@ -94,51 +94,31 @@
 
       this.scrollHandler = function scrollHandlerOriginal() {
         if (!this.isLoading) {
-          this.attemptLoad();
-          // this.attemptLoad_mob();
+          this.attemptLoad_mob();
         }
       }.bind(this);
 
       setTimeout(this.scrollHandler, 1);
       this.scrollParent.addEventListener('scroll', this.scrollHandler);
 
-      this.$on('$InfiniteLoading:loaded', () => {
+      this.$on('$InfiniteLoading_mob:loaded', () => {
         this.isFirstLoad = false;
         if (this.isLoading) {
-          this.$nextTick(this.attemptLoad);
+          this.$nextTick(this.attemptLoad_mob);
         }
       });
-      this.$on('$InfiniteLoading:complete', () => {
+      this.$on('$InfiniteLoading_mob:complete', () => {
         this.isLoading = false;
         this.isComplete = true;
         this.scrollParent.removeEventListener('scroll', this.scrollHandler);
       });
-      this.$on('$InfiniteLoading:reset', () => {
+      this.$on('$InfiniteLoading_mob:reset', () => {
         this.isLoading = false;
         this.isComplete = false;
         this.isFirstLoad = true;
         this.scrollParent.addEventListener('scroll', this.scrollHandler);
         setTimeout(this.scrollHandler, 1);
       });
-
-      // this.$on('$InfiniteLoading_mob:loaded', () => {
-      //   this.isFirstLoad = false;
-      //   if (this.isLoading) {
-      //     this.$nextTick(this.attemptLoad_mob);
-      //   }
-      // });
-      // this.$on('$InfiniteLoading_mob:complete', () => {
-      //   this.isLoading = false;
-      //   this.isComplete = true;
-      //   this.scrollParent.removeEventListener('scroll', this.scrollHandler);
-      // });
-      // this.$on('$InfiniteLoading_mob:reset', () => {
-      //   this.isLoading = false;
-      //   this.isComplete = false;
-      //   this.isFirstLoad = true;
-      //   this.scrollParent.addEventListener('scroll', this.scrollHandler);
-      //   setTimeout(this.scrollHandler, 1);
-      // });
     },
     /**
      * To adapt to keep-alive feature, but only work on Vue 2.2.0 and above, see: https://vuejs.org/v2/api/#keep-alive
@@ -151,24 +131,15 @@
       this.scrollParent.addEventListener('scroll', this.scrollHandler);
     },
     methods: {
-      attemptLoad() {
+      attemptLoad_mob() {
         const currentDistance = getCurrentDistance(this.scrollParent, this.$el, this.direction);
         if (!this.isComplete && currentDistance <= this.distance) {
           this.isLoading = true;
-          this.onInfinite.call();
+          this.onInfinite_mob.call();
         } else {
           this.isLoading = false;
         }
-      },
-      // attemptLoad_mob() {
-      //   const currentDistance = getCurrentDistance(this.scrollParent, this.$el, this.direction);
-      //   if (!this.isComplete && currentDistance <= this.distance) {
-      //     this.isLoading = true;
-      //     this.onInfinite_mob.call();
-      //   } else {
-      //     this.isLoading = false;
-      //   }
-      // }
+      }
     },
     destroyed() {
       if (!this.isComplete) {

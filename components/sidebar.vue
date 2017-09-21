@@ -104,7 +104,7 @@
         return this.$store.state.user
       },
       getUserImg: function(){
-        console.log("fbimg : " + this.$store.state.fbimg)
+        //console.log("fbimg : " + this.$store.state.fbimg)
         return this.$store.state.fbimg
       }
     },

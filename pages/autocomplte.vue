@@ -27,7 +27,6 @@
 
 import axios from 'axios'
 import Router from 'vue-router'
-import myMixin from '../mixins/myMixin'
 
 	export default {
 		data(){
@@ -52,7 +51,6 @@ import myMixin from '../mixins/myMixin'
 			}
 		},
 		middleware : ['authlogin'],
-		mixins: [myMixin]
 	}
 </script>
 <style>

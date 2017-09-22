@@ -12,7 +12,6 @@
       </v-flex>
       <!-- <v-touch v-on:swipeleft="onSwipeLeft">Swipe me!</v-touch> -->
       <!-- <p>{{product}}</p> -->
-      <p>{{date}}</p>
       <div class="hidden-md-and-up" >
          <h3 class="headline">{{product.title}}</h3>
          <h3 class="title">{{product.brand.brand}}</h3>

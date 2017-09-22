@@ -1,7 +1,7 @@
 <template>
 <v-layout column >          
     <v-dialog class="hidden-md-and-up" v-model="dialog" fullscreen transition="dialog-bottom-transition" :overlay=false>
-        <!-- <v-btn primary dark slot="activator">Filters</v-btn>  -->
+       
         <v-card >
             <v-toolbar dark class="primary">
                 <v-btn icon @click.native="dialog = false" dark>
@@ -48,14 +48,19 @@
                 <product-list-component></product-list-component>
              </v-layout> -->
              <!-- <p>{{$route.params}}</p> -->
-             <!-- <keep-alive> -->
+             
                 <v-layout class="inline" row wrap >
-                <v-btn primary dark  @click.native.stop="openfilters()" class= "filterbtn">Filters</v-btn>
-                    <no-ssr>
-                    <product-list-mob></product-list-mob>
-                    </no-ssr>
+                <v-btn primary dark  @click.native.stop="openfilters()" class= "hidden-md-and-up filterbtn">Filters</v-btn>
+                    <div class= "hidden-md-and-up" >
+                       <no-ssr>                    
+                          <product-list-mob></product-list-mob>          
+                       </no-ssr>                      
+                    </div>
+                    <div class= "hidden-sm-and-down ">
+                        <product-list-page></product-list-page>                      
+                    </div>
+
                 </v-layout>
-             <!-- </keep-alive>    -->
           </v-flex>
         </v-layout>
       </div>
@@ -77,7 +82,7 @@
 </template>
 
 <script>
-import ProductListComponent from '../components/product-list-component.vue'
+import ProductListPage from '../components/product-list-page.vue'
 import ProductListMob from '../components/product-list-mob.vue'
 import eventHub from '~plugins/event-hub' 
 import NoSSR from 'vue-no-ssr'
@@ -86,16 +91,8 @@ import axios from 'axios'
 
 export default {
     // for filters
-    asyncData({
-        store,
-        params
-    }, callback) {
-        let config = {
-            Authorization: store.getters.getToken.toString()
-        }
-        axios.get('http://52.52.8.87/api/v2/catalogue/filters/?shop=HighStreet', {
-                headers: config
-            })
+    asyncData({ store, params}, callback) {
+        axios.get('http://52.52.8.87/api/v2/catalogue/filters/?shop=HighStreet')
             .then((res) => {
                 callback(null, {
                     filters: res.data.data[0]
@@ -190,6 +187,7 @@ export default {
     },
     components: { 
       productListMob : ProductListMob,
+      productListPage : ProductListPage,
       'no-ssr': NoSSR },
     scrollToTop: false,
     middleware: ['infinitscroll', 'authlogin']

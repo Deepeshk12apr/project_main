@@ -1,10 +1,8 @@
 <template>
   <main>
-  <!-- <p id="idroute">{{$route.params.id}}</p> -->
   <v-layout>
     <v-dialog v-model="dialog" class="hidden-md-and-up " fullscreen transition="dialog-bottom-transition"  :overlay=false >
           <v-card >
-             <!-- <img :src="product.images[0]"> -->
           <div v-if ="product" class='pld'>
           <v-toolbar dark class="primary">
           <v-btn icon @click.native="closedialog" dark>
@@ -54,7 +52,6 @@
 
 import NoSSR from 'vue-no-ssr'
 import axios from 'axios'
-import myMixin from '../../mixins/myMixin.js'
 
 export default {
 
@@ -66,13 +63,11 @@ asyncData ({ params, error },callback) {
       return 0
 
   } else {
-    let vm = this
     console.log("param id is not zero " + params.id)
      return axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+params.id}`)
     //.then((res) => res.data)
     .then((res) => {
-        console.log(res.data.data[0].products)
-        vm.param = params
+        //console.log(res.data.data[0].products)
         callback(null, { 
           product: res.data.data[0].products ,
           description: res.data.data[0]
@@ -99,7 +94,6 @@ asyncData ({ params, error },callback) {
       data:""
     }
   },
-// mixins: [myMixin],
   methods :{
     closedialog : function(){
       this.dialog = false

@@ -23,7 +23,8 @@ const store = new Vuex.Store({
     productlist:null,
     addressid:null,
     billaddressid:null,
-    ordernumber:null
+    ordernumber:null,
+    pagenumber:1
   },
   mutations: {
     setUser(state,text){
@@ -72,6 +73,9 @@ const store = new Vuex.Store({
     setordernumber(state,text){
       state.ordernumber = text 
     },
+    setPageNumber(state,text){
+      state.pagenumber = text 
+    },
   },
   actions: {    
     setUser({ commit },context){
@@ -106,6 +110,12 @@ const store = new Vuex.Store({
     },
     setordernumber({ commit },context){
       commit('setordernumber',context)
+    },
+    setFromDoc({ commit },context){
+      commit('setFromDoc',context)
+    },
+    setPageNumber({ commit },context){
+      commit('setPageNumber',context)
     }
   },
    getters: {
@@ -119,6 +129,12 @@ const store = new Vuex.Store({
     },
     getaddressid :state => {
       return state.addressid
+    },
+    getFromdoc :state => {
+      return state.from_doc
+    },
+    getPagenumber :state => {
+      return state.pagenumber
     }
   }
 })

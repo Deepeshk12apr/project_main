@@ -50,10 +50,9 @@ import Router from 'vue-router'
 
 			}
 		},
-		middleware : ['authlogin'],
-	}
+		middleware : ['authlogin']	}
 </script>
-<style>
+<style>	
 	ul{
 		margin-top: -40px;
 	}

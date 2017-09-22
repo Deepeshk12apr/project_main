@@ -5,8 +5,7 @@
       <div  class="loader" v-else>
          <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
       </div>
-      <div class="">
-      
+      <div class="">      
       <v-layout class="inline product" row wrap>
          <v-flex xs6 sm4 md3  v-for="product in list" :key="product.title">
             <nuxt-link :to="'/productlist/'+product.id">
@@ -76,7 +75,7 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
             clientY:null,
             brandfilter:null,
             scrollPosition:0,
-            size:0
+            size:4
       }
     },
     methods: {
@@ -128,7 +127,14 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
             //let prvProductlist = getproductlistFromLocalStorage()
             //let prvdocfrom = getfrom_docFromLocalStorage()
 
-            let url = 'http://52.52.8.87/api/v2/catalogue/elastic-products/?shop=HighStreet&from_doc=' + fd + '&size=4'
+            // if(vm.from_doc == 0){
+            //     vm.size = 4
+            // } else {
+            //   vm.size += vm.from_doc
+            //   fd = 0 
+            // }
+
+            let url = 'http://52.52.8.87/api/v2/catalogue/elastic-products/?shop=HighStreet&from_doc=' + fd + '&size='+ vm.size
             if (typeof(filter) != "undefined") {
                 if (filter.length > 0) {
                     url = url + "&applied_filter=" + fltr
@@ -145,9 +151,9 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
                         .then((res) => {
                             //callback(null, { products: res.data.data[0].products })
                             vm.list = vm.list.concat(res.data.data[0].products)
-                            vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
                             fd = fd + 4
                             vm.from_doc = fd
+                            vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
                         })
                 }
             } else {
@@ -157,22 +163,26 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
                         vm.list = vm.list.concat(res.data.data[0].products)
                         fd = fd + 4
                         vm.from_doc = fd
+                        vm.$store.commit('setFromDoc',JSON.stringify(vm.from_doc))
                         vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
                     })
             }
             // setproductlist(JSON.stringify(vm.list))
             // console.log('productlist is getting set')
-             vm.$store.state.productlist = JSON.stringify(vm.list)
+
+             //vm.$store.state.productlist = JSON.stringify(vm.list)
+             vm.$store.commit('setproductlist',JSON.stringify(vm.list))
+             // vm.$store.commit('setFromDoc',JSON.stringify(vm.from_doc))
              window.localStorage.setItem('productlist', JSON.stringify(vm.list))
             // vm.$store.state.from_doc = 5.5
             //console.log("pl" + vm.$store.productlist + "fd" + vm.$store.from_doc)
             //this.$store.commit('setproductlist',JSON.stringify(vm.list))
             //setfrom_doc(vm.from_doc)
-            let str = "";
-            let c = vm.list.filter(function(obj){
-                    str += obj.id.toString() + "/"
-                    return obj.id
-            })
+            // let str = "";
+            // let c = vm.list.filter(function(obj){
+            //         str += obj.id.toString() + "/"
+            //         return obj.id
+            // })
             //console.log("infi : "+ str)
         },
      },

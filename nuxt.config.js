@@ -48,11 +48,11 @@ module.exports = {
   ** Build configuration
   */
   build: {
-    vendor: ['vuetify','vue-touch','vue-keep-scroll-position','~/mixins/myMixin']
+    vendor: ['vuetify','vue-touch','vue-scroll','~/mixins/myMixin']
   },
   plugins: ['~plugins/vuetify.js','~plugins/event-hub.js',
             { src: '~/plugins/vue-touch', ssr: false },
-            { src: '~/plugins/vue-keep-scroll-position', ssr: false }],
+            { src: '~/plugins/vue-scroll', ssr: false }],
   css: [
     { src: '~assets/style/app.styl', lang: 'styl' }
   ]

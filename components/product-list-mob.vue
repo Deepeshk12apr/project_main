@@ -5,9 +5,10 @@
       <div  class="loader" v-else>
          <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
       </div>
+      <!-- <div>{{offsetTop}}</div> -->
       <div class="">      
       <v-layout class="inline product" row wrap>
-         <v-flex xs6 sm4 md3  v-for="product in list" :key="product.title">
+         <v-flex xs6 sm4 md3  v-for="product in list" :key="product.title" >
             <nuxt-link :to="'/productlist/'+product.id">
                <v-card>
                   <v-card-media :src="product.images[0]" height="150px">
@@ -75,7 +76,8 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
             clientY:null,
             brandfilter:null,
             scrollPosition:0,
-            size:4
+            size:4,
+            offsetTop:0
       }
     },
     methods: {
@@ -88,6 +90,10 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
           //     }
           //     this.scrollPosition = currentScrollPosition;
           // },
+          onScroll (e) {
+            console.log("onScrolltop called ")
+            this.offsetTop = window.pageYOffset || document.documentElement.scrollTop
+          },
           captureddd: function(store){
             // console.log(e.srcElement)
             // console.log(e.clientX)
@@ -262,5 +268,8 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
   .inlineradio{
     display: inline-flex;
     padding: 0 15px 0 15px;
+  }
+  .fix{
+    position: fixed;
   }
 </style>

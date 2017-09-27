@@ -24,7 +24,8 @@ const store = new Vuex.Store({
     addressid:null,
     billaddressid:null,
     ordernumber:null,
-    pagenumber:1
+    pagenumber:1,
+    filter:null
   },
   mutations: {
     setUser(state,text){
@@ -76,6 +77,9 @@ const store = new Vuex.Store({
     setPageNumber(state,text){
       state.pagenumber = text 
     },
+    setfilter(state,text){
+      state.filter = text
+    }
   },
   actions: {    
     setUser({ commit },context){
@@ -116,6 +120,9 @@ const store = new Vuex.Store({
     },
     setPageNumber({ commit },context){
       commit('setPageNumber',context)
+    },
+    setfilter({ commit },context){
+      commit('setfilter',context)
     }
   },
    getters: {
@@ -135,6 +142,9 @@ const store = new Vuex.Store({
     },
     getPagenumber :state => {
       return state.pagenumber
+    },
+    getfilter :state => {
+      return state.filter
     }
   }
 })

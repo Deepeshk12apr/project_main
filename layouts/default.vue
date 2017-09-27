@@ -270,15 +270,58 @@ import sidebar from '.././components/sidebar'
   }
 </script>
 
-<style>   body, html {     height:100%;   }   li{     list-style-type:none;
-}   .toolbar a  {     text-decoration: none;     color: black;   }
-.btn__content{     display: grid !important;   }   .cart_btn{     margin-left:
-40px;   }   .search_input{     margin-left: 30% !important;    }
-.toolbar__extension{     justify-content: center;     margin: 10px 0px 0px
-0px;   }   .web_margin , .web_comp{     margin-top: 8%;   }   .web_toolbar2{
-margin-top: 3.25%;   }   .web_toolbar1 {     background-color: #f3f3f3;   }
-.web_toolbar1 span {     padding: 0px 20px 0px 20px;   }   .web_toolbar1
-.toolbar__content {     justify-content: flex-end;   }
-.toolbar.web_toolbar2{     box-shadow: 0 4px 4px 0px rgba(0,0,0,0.2)   }
-.web_toolbar1 {     box-shadow: none;   }   .toolbar.web_toolbar1  {
-background-color: #808080;   } .menu__content { position: fixed; } </style>
+<style>   
+ body,
+ html {
+     height: 100%;
+     /*overflow-y: hidden;*/
+ }
+ li {
+     list-style-type: none;
+ }
+ .toolbar a {
+     text-decoration: none;
+     color: black;
+ }
+ .btn__content {
+     display: grid !important;
+ }
+ .cart_btn {
+     margin-left: 40px;
+ }
+ .search_input {
+     margin-left: 30% !important;
+ }
+ .toolbar__extension {
+     justify-content: center;
+     margin: 10px 0px 0px 0px;
+ }
+ .web_margin,
+ .web_comp {
+     margin-top: 8%;
+ }
+ .web_toolbar2 {
+     margin-top: 3.25%;
+ }
+ .web_toolbar1 {
+     background-color: #f3f3f3;
+ }
+ .web_toolbar1 span {
+     padding: 0px 20px 0px 20px;
+ }
+ .web_toolbar1 .toolbar__content {
+     justify-content: flex-end;
+ }
+ .toolbar.web_toolbar2 {
+     box-shadow: 0 4px 4px 0px rgba(0, 0, 0, 0.2)
+ }
+ .web_toolbar1 {
+     box-shadow: none;
+ }
+ .toolbar.web_toolbar1 {
+     background-color: #808080;
+ }
+ .menu__content {
+     position: fixed;
+ }
+</style>

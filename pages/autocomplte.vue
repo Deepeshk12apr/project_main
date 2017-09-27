@@ -1,5 +1,6 @@
 <template>
-<main>
+<main class="sdm" v-scroll="onScroll">
+<!-- <div>{{offsetTop}}</div><br> -->
  searching for {{search}}
    <v-text-field
       name="input-1-3"
@@ -17,7 +18,7 @@
           <hr>
           </v-list-tile>
     </v-list>
-<!--     <div v-for="(item,i) in items">
+<!--<div v-for="(item,i) in items">
     	<li>{{items[i]}}</li>
     </div> -->
     <v-btn dark @click.native="redirect('/')">Save</v-btn>
@@ -34,9 +35,14 @@ import Router from 'vue-router'
 				search:"",
 				items: [],
 				query:null,
+				offsetTop:0
 			}
 		},
 		methods : {
+			          onScroll (e) {
+            console.log("onScrolltop called ")
+            this.offsetTop = window.pageYOffset || document.documentElement.scrollTop
+          },
 			searchM(){
 				let vm =  this
 				axios.get("http://52.52.8.87/api/v2/catalogue/autocomplete/?input_text='"+ vm.search +"'")
@@ -46,13 +52,17 @@ import Router from 'vue-router'
 			      })
 			},
 			redirect(item){
-				this.$nuxt.$router.replace('/search/'+item)
+				this.$nuxt.$router.replace('/pdlist?search='+item)
 
 			}
 		},
 		middleware : ['authlogin']	}
 </script>
 <style>	
+	.sdm{
+		height: 200px;
+
+	}
 	ul{
 		margin-top: -40px;
 	}

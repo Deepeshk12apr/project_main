@@ -22,3 +22,4 @@ export const  getproductlistFromLocalStorage = () => {
   const json = window.localStorage.productlist
   return json 
 }
+

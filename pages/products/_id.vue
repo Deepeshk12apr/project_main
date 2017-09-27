@@ -12,7 +12,7 @@
       </v-flex>
       <!-- <v-touch v-on:swipeleft="onSwipeLeft">Swipe me!</v-touch> -->
       <!-- <p>{{product}}</p> -->
-      <p>{{date}}</p>
+      <!-- <p>{{date}}</p> -->
       <div class="hidden-md-and-up" >
          <h3 class="headline">{{product.title}}</h3>
          <h3 class="title">{{product.brand.brand}}</h3>
@@ -290,6 +290,9 @@ export default {
       //   console.log("quantity" + this.quantity)
       //   return  this.quantity--
       // },
+      quantityUpdate: function(quantity,item){
+
+      },
       inc : function(itemid){
         console.log("itemid is " + itemid)
         this.quantity++

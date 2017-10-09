@@ -127,7 +127,9 @@ const store = new Vuex.Store({
   },
    getters: {
     getToken: state => {
-      
+      if(state.token == null ){
+        return
+      } 
       if(state.token.length > 1){
         return 'Token ' + state.token
       } else {

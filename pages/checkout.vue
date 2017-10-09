@@ -36,7 +36,7 @@ import axios from 'axios'
       	order_number:null,
       	option: {
 			    "key": "rzp_test_wUOqNZsgEr2CQ5",
-			    "amount": "2000", // 2000 paise = INR 20
+			    "amount": 0, // 2000 paise = INR 20
 			    "name": "Zapyle",
 			    "description": "Purchase Description",
 			    "image": "../static/v.png",
@@ -87,13 +87,16 @@ import axios from 'axios'
     	},
     	pay: function () {
 
+    	
+       //getting payable amount
+
 		let vm =  this
 		let url = "http://52.52.8.87/api/v2/order/create-transaction/"
 		let mode = ''
 		if(vm.paymentmode != "cod")
 			mode = 'razorpay'
 
-		let config = {
+		let config_post = {
 	          	Authorization: "Token " + this.$store.state.token
 	         	}
 		axios.post(url, 
@@ -103,12 +106,15 @@ import axios from 'axios'
 				billing_address: vm.$store.state.addressid,
 				shipping_address: vm.$store.state.billaddressid,
 			},
-			{headers: config}
+			{headers: config_post}
 		).then((res) => {
 			console.log(res.data.data[0].order_number)
+			vm.amount = res.data.data[0].payable_amount * 100
 			vm.option.notes.refreance_no = res.data.data[0].order_number
 			//vm.order_number = res.data.data[0].order_number
 			vm.$store.commit('setordernumber',res.data.data[0].order_number)
+			//vm.$store.commit('setpayableamount',res.data.data[0].payable_amount)
+			
 		})
 
 
@@ -117,10 +123,19 @@ import axios from 'axios'
 		this.option.prefill.method = vm.paymentmode
 		//save mobile
 
-    	console.log("isLogged : " + this.$store.state.islogged)
-    	const rzp1 = new Razorpay(this.option)
-    	rzp1.open()
-      	console.log('pay')
+		let config = { Authorization : this.$store.getters.getToken.toString() }
+    	let vm_payable = this
+    	axios.get('http://52.52.8.87/api/v2/cart', { headers: config })
+    	 .then(response => {
+    	 	vm_payable.option.amount = response.data.data[0].items.total_price * 100
+    	 	alert(vm_payable.option.amount)
+    	 	const rzp1 = new Razorpay(vm_payable.option)
+    		rzp1.open()
+            console.log(response.data)	
+          })
+
+    	// console.log("isLogged : " + this.$store.state.islogged)
+     //  	console.log('pay')
     	}	
  	 },
  	middleware : 'authlogin'

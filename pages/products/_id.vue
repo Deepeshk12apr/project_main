@@ -12,6 +12,7 @@
       </v-flex>
       <!-- <v-touch v-on:swipeleft="onSwipeLeft">Swipe me!</v-touch> -->
       <!-- <p>{{product}}</p> -->
+      <!-- <p>{{date}}</p> -->
       <div class="hidden-md-and-up" >
          <h3 class="headline">{{product.title}}</h3>
          <h3 class="title">{{product.brand.brand}}</h3>
@@ -42,9 +43,19 @@
             </div></div> -->
          <br>
          <div class="title">RS {{product.listing_price}}</div>
-         <div class="title">color</div>
+        <v-btn icon :ripple="false" @click.native="togglelove(product.id)">
+            <!-- <p>{{product.is_loved}}</p> -->
+            <div v-if="product.is_loved">
+              <v-icon large class="redheart" >favorite</v-icon>
+            </div>                    
+            <div v-else>
+              <v-icon large >favorite</v-icon>  
+            </div>
+            </v-btn>
+         <div class="title">colors</div>
          <div class="inlineradio color" v-for="color in product.color">
-            <v-radio v-bind:label="`${color}`" v-model="colors" :value="color" v-bind:style="{ 'background-color': `${color}`,height: '50px',width: '50px' }">
+           <!-- <p>{{color.color}}</p>  -->
+            <v-radio  v-model="colors" :value="color.color" v-bind:style="{ 'background-color': `${color.color}`,height: '50px',width: '50px' }">
             </v-radio>
          </div>
          <div class="title">Size : {{size}}</div>
@@ -156,8 +167,10 @@ export default {
     // Will change every 10 secondes
     return Math.floor(Date.now() / 10000)
   },
-  asyncData ({ params, error },callback) {
-    return axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+params.id}`)
+  asyncData ({ params, store },callback) {
+
+    var config = { Authorization: store.getters.getToken.toString() };
+    return axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+params.id}`, { headers: config })
     .then((res) => {
         console.log(res.data.data[0].products)
         callback(null, { 
@@ -231,6 +244,20 @@ export default {
     }
   },
     methods: {
+      togglelove : function(pid){
+
+        let vm = this
+        let url = "http://52.52.8.87/api/v2/user/love/" + pid
+        let config = { Authorization : this.$store.getters.getToken.toString() } 
+        axios.get(url, { headers: config } )
+        .then(response => {
+              console.log(response.data.data[0].data)
+              //let result = response.data.data[0].data == 'Loved' ? true : false
+              vm.$router.go()
+              // vm.love = result
+              // vm.islove()
+            })
+      },
        changeImg:function(img){ 
           document.getElementById('p_img').src = img; 
       },      
@@ -510,4 +537,9 @@ export default {
   .smallImg_container{
     height: 600px;
   }
+
+  i.icon.icon--large.material-icons.redheart {
+    color : red;
+  }
+
 </style>

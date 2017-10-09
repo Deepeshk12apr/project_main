@@ -38,6 +38,12 @@ export const setUser = (user) => {
   Cookie.set('user', JSON.stringify(user))
 }
 
+export const setFbimg = (fbimgUrl) => {
+  if (process.SERVER_BUILD) return
+  window.localStorage.setItem('fbimg',JSON.stringify(fbimgUrl))
+  Cookie.set('fbimg', JSON.stringify(fbimgUrl))
+}
+
 export const setCart = (cart) => {
   if (process.SERVER_BUILD) return
   window.localStorage.setItem('cart',JSON.stringify(cart))

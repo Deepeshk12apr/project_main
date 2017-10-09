@@ -1,48 +1,11 @@
 <template>
   <v-app toolbar footer>
-    <v-navigation-drawer
-      persistent
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      v-model="drawer"
-    >
-      <v-list>
-        <v-list-tile 
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-        >
-          <v-list-tile-action>
-            <v-icon v-html="item.icon"></v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title v-text="item.title"></v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-navigation-drawer>
-    <v-toolbar fixed>
-      <v-toolbar-side-icon @click.native.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-spacer></v-spacer>
-      <router-link to='/search'>
-        <v-btn icon>
-          <v-icon>search</v-icon>
-        </v-btn>
-      </router-link>
-      <v-spacer></v-spacer>
-      <v-toolbar-title v-text="title"></v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon>favorite</v-icon>
-      </v-btn>
-      <v-spacer></v-spacer>
-      <v-btn icon>
-        <v-icon>add_shopping_cart</v-icon>
-      </v-btn>
-    </v-toolbar>
     <main>
       <v-container fluid>
-        <nuxt />
+       <no-ssr> 
+        <nuxt>
+        </nuxt>
+       </no-ssr>
       </v-container>
     </main>
     <v-footer :fixed="fixed">
@@ -52,6 +15,8 @@
 </template>
 
 <script>
+import NoSSR from 'vue-no-ssr'
+
   export default {
     data () {
       return {
@@ -71,7 +36,11 @@
     methods: {
       redirectto: function(){
         
-      }
-    }
+      }  
+    },
+    components: {
+        'no-ssr': NoSSR
+    },
+
   }
 </script>

@@ -27,19 +27,30 @@ module.exports = {
     ['@nuxtjs/component-cache', { maxAge: 1000 * 60 * 60 }],
   ],
    render: {
-    bundleRenderer: {
-      cache: require('lru-cache')({
-        max: 1000,
-        maxAge: 1000 * 60 * 15
-      })
-    }
+    // bundleRenderer: {
+    //   cache: require('lru-cache')({
+    //     max: 1000,
+    //     maxAge: 1000 * 60 * 15
+    //   })
+    // }
   },
-  //   scrollBehavior: function (to, from, savedPosition) {
-  //     console.log("from congig" + savedPosition)
-  //     console.log(savedPosition)
-  //     return { x: 0, y: 500 }
-  //   }
-  // },
+  router :{
+
+    routes: [
+      {
+        name: 'Discover',
+        path: '/',
+        component: 'pages/discover.vue'
+      }
+    ]
+
+    // scrollBehavior: function (to, from, savedPosition) {
+    //   console.log("from congig to : " + window.localStorage.scrollY)
+    //   console.log(to)
+    //   console.log(from)
+    //   return { x: 0, y: 0 }
+    // }
+  },  
   /*
   ** Customize the progress-bar color
   */
@@ -48,11 +59,12 @@ module.exports = {
   ** Build configuration
   */
   build: {
-    vendor: ['vuetify','vue-touch','vue-scroll','~/mixins/myMixin']
+    vendor: ['vuetify','vue-touch','vue-scroll','vue-clipboard2','~/mixins/myMixin']
   },
   plugins: ['~plugins/vuetify.js','~plugins/event-hub.js',
             { src: '~/plugins/vue-touch', ssr: false },
-            { src: '~/plugins/vue-scroll', ssr: false }],
+            { src: '~/plugins/vue-scroll', ssr: false },
+            { src: '~/plugins/vue-clipboard2', ssr: false }],
   css: [
     { src: '~assets/style/app.styl', lang: 'styl' }
   ]

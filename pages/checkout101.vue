@@ -19,7 +19,7 @@
                   <v-flex xs9>
                     <div>
                       <div class="title">{{item.product_name}}</div>
-                      <div class="headline">$  {{item.original_price}}</div>
+                      <div class="headline">&#8377 {{item.listing_price}}</div>
                       <v-breadcrumbs class='bc' divider="/">
 				      <v-breadcrumbs-item>{{ item.size }}</v-breadcrumbs-item>
 				      <v-breadcrumbs-item>{{ item.color }}</v-breadcrumbs-item>
@@ -37,12 +37,26 @@
      <br>
 	</div>
 		<label>Shipping charge</label>
-		<div class='title tp'>${{products.items.shipping_charge}}</div><br><br>
+		<div class='title tp'> &#8377{{products.items.shipping_charge}}</div><br><br>
 		<label>Discounted price</label>
-		<div class='title tp'>${{products.items.discounted_price}}</div><br><br>
+		<div class='title tp'>&#8377 {{products.items.discounted_price}}</div><br><br>
 		<label>Total price</label>
-		<div class='title tp'>${{products.items.total_price}}</div>
-		
+		<div class='title tp'>&#8377 {{products.items.total_price}}</div>
+	<br><br>
+	<div class="coupon">
+		<p @click="hascoupon = !hascoupon"> Have a coupon code?</p>
+		<div v-if="hascoupon">
+			<v-text-field
+              name="input-1"
+              label="ZAP500"
+              v-model='couponcode'
+              single-line
+              id="couponcode"
+            ></v-text-field>
+            <v-btn color="primary" @click.native="applycoupon()">apply</v-btn>
+		</div>
+	</div>
+
 	<nuxt-link v-if='this.$store.state.token.length > 1 ' to="account/address">
 		<v-btn class="green" block secondary >Next</v-btn><br><br>
 	</nuxt-link>
@@ -89,7 +103,31 @@ export default {
 	  //   })
 	  //   //store.commit('setStars', data)
 	  // }, 
+	data (){
+		return {
+			products: null,
+			hascoupon: false,
+			couponcode: 'ZAP500'
+		}
+	}  ,
 	methods:{
+		applycoupon: function(){
+			alert(this.couponcode)
+			let vm = this
+			let url = "http://52.52.8.87/api/v2/offer/apply_coupon?coupon_code="+ vm.couponcode
+			let config = { Authorization : vm.$store.getters.getToken.toString() }
+			axios.get(url, { headers: config })
+			.then((res)=>{
+				if(res.status == 200){					
+			    	 axios.get('http://52.52.8.87/api/v2/cart', { headers: config })
+			    	 .then(response => {
+			            console.log(response.data)
+			            vm.products= response.data.data[0]
+			          })
+				}
+			})
+
+		},
 		  sendrqst: function () {
 		  	axios.defaults.headers.common['Authorization'] = 'Token 1d33d892363d32771c4dc923fd8df708fdcc2c35';
 		      return axios.post(`http://52.52.8.87/api/v2/cart/`,
@@ -117,6 +155,9 @@ export default {
 </script>
 
 <style>
+	.coupon{
+
+	}
 	.tp{
 		float: right;
 		/*padding: 15px;*/

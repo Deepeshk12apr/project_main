@@ -21,7 +21,7 @@
 	                    <nuxt-link :to="'products/'+item.product_attribute_id">
 	                      <div class="title">{{item.product_name}}</div>
 	                    </nuxt-link>  
-	                      <div class="headline">$  {{item.original_price}}</div>
+	                      <div class="headline">&#8377 {{item.listing_price}}</div>
 	                      <v-breadcrumbs divider="/">
 					      <v-breadcrumbs-item>{{ item.size }}</v-breadcrumbs-item>
 					      <v-breadcrumbs-item>{{ item.color }}</v-breadcrumbs-item>

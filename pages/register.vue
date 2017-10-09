@@ -78,7 +78,7 @@
 <script>
 
 import axios from 'axios'
-import { setUser,setToken} from '../utils/auth'
+import { setUser,setToken, setFbimg} from '../utils/auth'
 
 export default {
     data () {	
@@ -89,6 +89,7 @@ export default {
         password:'12April1992'
       }
     },
+    middleware:['authlogin'],
     methods: {
     	pass: function (todo) {
       	this.$store.commit('setUser',this.email);
@@ -156,7 +157,7 @@ export default {
                 setUser(response.data[0].data)
                 vm.$store.commit('setUser',response.data[0].data);
                 vm.$store.commit("setfbimg","http://graph.facebook.com/"+response.data[0].data.fb_id+"/picture")
-
+                setFbimg("http://graph.facebook.com/"+response.data[0].data.fb_id+"/picture")
                 //setUserRole()
                 console.log('loggedin')
                 vm.$router.replace('/')

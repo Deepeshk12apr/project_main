@@ -19,15 +19,23 @@
       v-model="user.email"
     ></v-text-field>
         <v-text-field
-      label="Full address"
-      v-model="user.email"
-      required
+      label="Sex"
+      v-model="user.sex"
+    ></v-text-field>
+    </v-text-field>
+        <v-text-field
+      label="Birthday"
+      v-model="user.dob"
+    ></v-text-field>
+        </v-text-field>
+        <v-text-field
+      label="Anniversary"
+      v-model="user.anniversary"
     ></v-text-field>
     </v-text-field>
         <v-text-field
       label="Mobile Number"
-      v-model="user.email"
-      
+      v-model="user.mobile"
     ></v-text-field>
      <v-btn @click.native ="saveuser()">submit</v-btn>
     </form>
@@ -65,7 +73,9 @@
 	        console.log(config)
 	        axios.post('http://52.52.8.87/api/v2/user/my-profile/',
 	       	{
-				name: vm.user.name
+				sex: vm.user.sex,
+				dob:vm.user.dob			
+				
 			},
 	         { headers: config })	
 	            .then((res) => {

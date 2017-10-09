@@ -1,5 +1,6 @@
 <template>
-<v-layout column >          
+<v-layout column >
+<p>{{loadfilter}}</p>          
     <v-dialog class="hidden-md-and-up" persistent v-model="dialog" fullscreen transition="dialog-bottom-transition" :overlay=false>
         <v-card >
             <v-toolbar dark  class="primary">
@@ -13,51 +14,97 @@
                 </v-toolbar-items>
             </v-toolbar>
             <hr>
-            <div class="faded"><br>
+            <div v-if="filters" class="faded"><br>
                 <h4>Brand</h4>
                 <div class="maincategory" v-for="brand in filters.brand">
                     <v-checkbox :label="brand.key" v-model="brands" :value="brand.key"></v-checkbox>
                 </div>
                 <h4>Colors</h4>
                 <!-- <p>{{filters}}</p> -->
-                <div class="maincategory" v-for="c in filters.color">
+                <div class="maincategory colorfilter" v-for="c in filters.color">
+                <v-layout>
+                <v-flex xs6 sm5 md4>
                     <v-checkbox :label="c.key" v-model="colors" :value="c.key"></v-checkbox>
+                </v-flex>
+                </v-layout>
                 </div>
                 <hr>
+                    <h6>Category</h6>
+                <div v-for="cat in filters.category">
+                  <!-- <span>{{cat.key}}</span> -->                 
+                  <v-checkbox :label="cat.key" v-model="category" :value= "`${parentcat(cat)}`"></v-checkbox>
+                  <!-- <li  v-for="c in cat.sub_category_count.buckets">
+                    {{c.key}} ({{c.doc_count}})
+                  </li> -->
+                  <div class="subCat" v-for="c in cat.sub_category_count.buckets">
+                    <v-checkbox :label="c.key" v-model="category" :value="c.key"></v-checkbox>  
+                  </div>
+                </div>
             </div>
         </v-card>
     </v-dialog>
-   
+      <div v-if="filters" ></div>
       <v-layout row  class="scroll">
-          <v-flex md3 lg3 offset-mg2 offset-lg2 class="hidden-sm-and-down">
+          <v-flex md3 lg3 offset-md1 offset-lg1 class="hidden-sm-and-down">
               <p>Brand</p>
-              <div class="maincategory" v-for="brand in filters.brand">
-                  <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox>
+              <div class="maincategory" v-for="(brand,i) in filters.brand">
+                  <!-- <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox> -->
+                  <div v-if="i<5">
+                      <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox>
+                  </div>
+                  <div v-else>
+                      <v-checkbox class="color hidden" :label="brand.key" v-model="brands" :value="brand.key"></v-checkbox>
+                      <div v-if="isShowmore(i,filters.brand)">
+                          <a @click="showcolor()"> + {{filters.brand.length - 5}} more </a>
+                      </div>
+                  </div>
               </div>
               <p>Color</p>
               <div class="maincategory" v-for="(color,i) in filters.color">
                   <div v-if="i<5">
-                      <v-checkbox :label="color.key" v-model="brands" :value="color.key"></v-checkbox>
+                      <v-checkbox :label="color.key" v-model="colors" :value="color.key"></v-checkbox>
                   </div>
                   <div v-else>
-                      <v-checkbox class="color hidden" :label="color.key" v-model="brands" :value="color.key"></v-checkbox>
+                      <v-checkbox class="color hidden" :label="color.key" v-model="colors" :value="color.key"></v-checkbox>
                       <div v-if="isShowmore(i,filters.color)">
                           <a @click="showcolor()"> + {{filters.color.length - 5}} more </a>
                       </div>
                   </div>
               </div>
+              <!-- <p>Discount</p>
+              <p>{{filters.discount}}</p>
+              <div class="maincategory" v-for="dist in filters.discount">
+                  <p>{{dist}}</p>
+                  <v-checkbox :label="dist.key" @change = "applyfilter" v-model="discount" :value="dist.key"></v-checkbox>
+              </div> -->
+              <p>Dress Length</p>
+              <!-- <p>{{filters.dress_length}}</p> -->
+              <div class="maincategory" v-for="dl in filters.dress_length">
+                  <!-- <p>{{dl}}</p> -->
+                  <v-checkbox :label="dl.key" @change = "applyfilter" v-model="dress_length" :value="dl.key"></v-checkbox>
+              </div>
+              <!-- <p>Price</p>
+              <p>{{filters.listing_price}}</p>
+              <div class="maincategory" v-for="price in filters.listing_price">
+                  <p>{{price}}</p>                  
+                  <v-checkbox :label="price.from ||0 +' to '+ price.to  " @change = "applyfilter" v-model="listing_price" :value="price.key"></v-checkbox>
+              </div> -->
+              <p>Style</p>
+              <div class="maincategory" v-for="styl in filters.style">                                  
+                  <v-checkbox :label="styl.key" @change = "applyfilter" v-model="style" :value="styl.key"></v-checkbox>
+              </div>
           </v-flex>
            <v-flex sm12 xs12 md9>
                 <v-layout class="inline" row wrap >
                 <v-btn primary dark  @click.native="openfilters()" class= "hidden-md-and-up filterbtn">Filters</v-btn>
-                    <div class= "hidden-md-and-up">
+                    <div >
                        <no-ssr>                    
                           <product-list-mob-paged></product-list-mob-paged>          
                        </no-ssr>                      
                     </div>
-                    <div class= "hidden-sm-and-down ">
+                    <!-- <div class= "hidden-sm-and-down ">
                         <product-list-page></product-list-page>                      
-                    </div>
+                    </div> -->
                 </v-layout>
           </v-flex>
         </v-layout>
@@ -71,55 +118,145 @@ import eventHub from '~plugins/event-hub'
 import NoSSR from 'vue-no-ssr'
 //import vuescroll from 'vue-scroll'
 import axios from 'axios'
+import { setfilters} from '../utils/filter'
 
 export default {
     // for filters
-    asyncData({ store, params}, callback) {
-        axios.get('http://52.52.8.87/api/v2/catalogue/filters/?shop=HighStreet')
-            .then((res) => {
-                callback(null, {
-                    filters: res.data.data[0]
-                })
-            })
-    },
-
+    // asyncData({ store, params}, callback) {
+    //     axios.get('http://52.52.8.87/api/v2/catalogue/filters')
+    //         .then((res) => {
+    //             callback(null, {
+    //                 filters: res.data.data[0]
+    //             })
+    //         })
+    // },
     data() {
         return {
-            dialog: false,
-            colors: [],
+            filters:{},
+            dialog: false,            
             position:0,
             brands: [],
             category: [],
+            colors: [],
+            discount:[],
+            dress_length:[],
+            listing_price:[],
+            sleeve_length:[],
+            style:[],
+            top_length:[],
             dp:true,
             filter:false,
             mobile:true
         }
     },
-    ready: function() {
-        // if( document.clientWidth >= 992 )
-        // {
-        //     this.mobile = false;
-        // }
-    },
     computed : {
-      
+            loadfilter :function(){
+            let vm = this
+            let cat_query = vm.$nuxt.$route.query.category
+            let subcat_query = vm.$nuxt.$route.query.subcat
+            // let category = {"category":[cat_query]}
+            let url
+            if(subcat_query != undefined){
+               url =  'http://52.52.8.87/api/v2/catalogue/filters/?applied_filter={"parent_category_name":["'+ cat_query +'"],"category":["'+ subcat_query +'"]}'
+            } else {
+               url =  'http://52.52.8.87/api/v2/catalogue/filters/?applied_filter={"parent_category_name":["'+ cat_query +'"]}'
+            }
+            
+            axios.get(url)
+            .then((res) => {
+               console.log(res.data.data[0])
+                console.log(res.data.data[0])
+                vm.filters = res.data.data[0]
+                
+            })
+          },
+    },
+    created() {
+          alert('called from pdlist')
+          eventHub.$on('updatefiler', this.updatefilter)
     },
     methods: {
+          updatefilter :function(name){
+            let vm = this
+            let url =  'http://52.52.8.87/api/v2/catalogue/filters/?applied_filter={"parent_category_name":["'+ name +'"]}'
+            axios.get(url)
+            .then((res) => {
+              console.log(res.data.data[0])
+
+              vm.filters = res.data.data[0]
+                
+            })
+          },
+          parentcat : function(data){
+          let v =  data.sub_category_count.buckets.map(function(obj){
+                return obj.key
+            }).join('","')
+          //console.log(v)
+          return v
+          },
           applyfilter : function(){
             console.log("applyfilter")
-            let filters = {
-            	brand : this.brands,
-            	color : this.colors
-            }
+              let filters = { }
+
+              if(this.brands){
+                 if(this.brands.length)
+                 filters["brand"] = [].concat(this.brands)
+              }
+              if(this.colors){
+                if(this.colors.length)
+                filters["color"] = [].concat(this.colors)
+              }
+              if(this.category){
+                if(this.category.length)
+                filters["category"] = [].concat(this.category)
+              }
+              if(this.discount){
+                if(this.discount.length)
+                filters["discount"] = [].concat(this.discount)
+              }
+              if(this.dress_length){
+                if(this.dress_length.length)
+                filters["dress_length"] = [].concat(this.dress_length)
+              }
+              if(this.listing_price){
+                if(this.listing_price.length)
+
+                filters["listing_price"] = [].concat(this.listing_price)
+              }
+              if(this.sleeve_length){
+                if(this.sleeve_length.length)
+                filters["sleeve_length"] = [].concat(this.sleeve_length)
+              }
+              if(this.style){
+                if(this.style.length)
+                filters["style"] = [].concat(this.style)
+              }
+              if(this.top_length){
+                if(this.top_length.length)
+                filters["top_length"] = [].concat(this.top_length)
+              }
+              
               this.$store.commit('setfilter',filters)
               let byfilter = true
               eventHub.$emit('emitfilter',byfilter)
               this.dialog = false
+
+              setfilters(JSON.stringify(filters))
+
             },
           
           openfilters(){
-           		console.log("hit")
-         		 this.dialog = true
+          		let vm = this
+        	   	let filter = this.$store.getters.getfilter
+              if(filter){
+                vm.brands = filter.brand
+                vm.colors = filter.color
+                vm.category = filter.category  
+              }
+              
+		    	console.log("openfilters")
+		    	console.log(filter)
+         		this.dialog = true
           },
         //for hiding filters greater than 5 in number isShowmore , showcolor
         isShowmore(count, objArr) {
@@ -140,17 +277,23 @@ export default {
             }
         }
     },
+    created(){
+          // let pos = window.localStorage.scrollY
+          // console.log("pos from close dialog" + pos)
+          // window.scrollTo(0,pos)
+    },
+    // layout:['search'],
     components: { 
     	productListMobPaged : ProductListMobPaged,
     	productListPage : ProductListPage,
     	'no-ssr': NoSSR },
     scrollToTop: true,
-    middleware: ['infinitscroll', 'authlogin']
+    middleware: ['infinitscroll', 'authlogin','filter']
 
 }
 </script>
 
-<style>
+<style scoped>
 /*  .scrollparent{
     max-height: 100%;
     overflow: hidden;

@@ -10,10 +10,16 @@
           :to="item.to"
         >
           <v-list-tile-content>
-            <v-list-tile-title v-text="item.title"></v-list-tile-title>
+            <v-list-tile-title v-text="item.title"></v-list-tile-title>           
           </v-list-tile-content>
           <v-list-tile-action>
-            <v-icon v-html="item.icon"></v-icon>
+            
+            <div v-if="item.title == 'Zap Cash'">
+              <v-list-tile-title>{{zapcash}}</v-list-tile-title>  
+            </div> 
+            <div v-else>
+              <v-icon v-html="item.icon"></v-icon>
+            </div>
           </v-list-tile-action>
         </v-list-tile>
       </v-list>
@@ -35,14 +41,19 @@
   </main>
 </template>
 <script>
+
+import axios from 'axios'
+
   export default {
     data () {
       return {
+        zapcash : 0,
         account: [
           { icon: 'bubble_chart', title: 'Profile', to: '/account/profile', islogged: true },
           { icon: 'bubble_chart', title: 'Address Details', to: '/account/address' },
           { icon: 'bubble_chart', title: 'Recent Orders', to: '/account/order' },
           { icon: 'bubble_chart', title: 'Coupons', to: '/account/coupon'},
+          { icon: 'bubble_chart', title: 'Zap Cash', to: '/account/coupon'},
           { icon: 'bubble_chart', title: 'Refer & Earn', to: '/account/refer' }
         ],
         contact: [
@@ -50,7 +61,21 @@
           { title: 'care@zapyle.com', to: '/myaccount' }
         ]
       }
-  }
+  },
+  created(){
+          let vm = this
+          let config = { Authorization : this.$store.getters.getToken.toString() } 
+          console.log(config)
+         axios.get('http://52.52.8.87/api/v2/user/wallet-balance/', { headers: config } )
+         .then(response => {
+                vm.zapcash = response.data.data[0].cash 
+                console.log(response.data.data[0].cash)
+            })
+         .catch((e) => {
+                console.log(e)
+              })
+  },
+  middleware: ['authlogin']
 }
 </script>
 

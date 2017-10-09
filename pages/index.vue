@@ -45,7 +45,8 @@
           }
         ]
       }
-    }
+    },
+    middleware:['authlogin']
   }
 </script>
 

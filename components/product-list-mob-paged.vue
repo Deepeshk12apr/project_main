@@ -1,16 +1,21 @@
 <template>
    <main>
-      <div v-if="list.length > 0">
+      <div   class="loader"  v-if="list.length > 0">
       </div>
-      <div  class="loader" v-else>
+      <div v-else>
          <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
       </div>
       <!-- <div>{{offsetTop}}</div> -->
       <div class="">      
       <v-layout class="inline product" row wrap>
-         <v-flex xs6 sm4 md3  v-for="product in list" :key="product.title" >
+         <div v-if="noProductsFound">
+           <h4>No products found </h4>
+         </div>
+         <!-- <div v-else> -->
+            <v-flex xs6 sm4 md3  v-for="product in list" :key="product.title" >
             <!-- <nuxt-link :to="'/pdlist/'+product.id"> -->
-               <v-card @click="redirectcard(product)">
+               <v-card @click="indivisualproduct(product)">
+               <!-- <v-card @click="loaddialogdirectly(product.product_attr_id)"> -->
                   <v-card-media :src="product.images[0]" height="150px">
                   </v-card-media>
                   <!-- <p>{{product.images}}</p> -->
@@ -18,7 +23,7 @@
                      <div class="product_data">
                         <p class="subheading">{{product.brand}}</p>
                         <!-- <p class="body-1 mb-2 title">{{product.title}}</p> -->
-                        <p class= "body-1  listing_price"><b>RS {{removeDecimal(product.listing_price)}}</b></p>
+                        <p class= "body-1  listing_price"><b>&#8377 {{removeDecimal(product.listing_price)}}</b></p>
                      </div>
                   </v-card-title>
                </v-card>
@@ -26,20 +31,32 @@
             <v-btn icon class="quickView" @click.native.stop="opendialog(product)">
                  <v-icon>remove_red_eye</v-icon>
             </v-btn>
-         </v-flex>
-         <infinite-loading :on-infinite="onInfinite" ref="infiniteLoading"></infinite-loading>
+          </v-flex>
+          <infinite-loading :on-infinite="onInfinite" ref="infiniteLoading"></infinite-loading>          
+         <!-- </div> -->
          <v-dialog class="hidden-md-and-up" v-model="dialog_mob" persistent fullscreen transition="dialog-bottom-transition" :overlay=false>
           <v-card >
           <v-toolbar dark absolute class="primary" scroll-off-screen scroll-target="#pdc">
-          <v-btn icon @click.native="dialog_mob = false" dark>
+          <v-btn icon @click.native="closedialog" dark>
             <v-icon>close</v-icon>
           </v-btn>
           </v-toolbar>
+          <!-- <p>{{dproduct}}</p> -->
             <div id="pdc" class="dialogCard" v-if="dproduct">
-                  this one
+                  <!-- <p>{{dproduct}}</p> -->
+                    <v-flex xs4>
+                     <v-breadcrumbs divider="/">
+                        <v-breadcrumbs-item 
+                           v-for="item in bcItems" :key="item"
+                           :disabled="item.disabled"
+                           >
+                           {{ item }}
+                        </v-breadcrumbs-item>
+                     </v-breadcrumbs>
+                  </v-flex>
                   <div class="headline">{{dproduct.title}}</div>
                   <div class="title">{{dproduct.brand.brand}}</div>  
-                  <div class="title">RS {{dproduct.listing_price}}</div>
+                  <div class="title">&#8377 {{dproduct.listing_price}}</div>
                               <no-ssr> 
             <v-touch v-on:swipeleft="onswipeleft" v-on:swiperight="onswiperight" class="dragme">
             <div id="imgcon" class="subcon">
@@ -51,19 +68,38 @@
             </div>
             </v-touch>
             </no-ssr>
-                           <div class="title">Size : {{productSize}}</div>
+            <!-- <p>{{dproduct.is_loved}}</p> -->
+            <!-- <v-icon large color="blue darken-2">favorite</v-icon><br> -->
+            <p>{{love}}</p>
+            <v-btn icon :ripple="false" @click.native="togglelove(dproduct.id)">
+            <div v-if="love">
+              <v-icon large class="redheart" >favorite</v-icon>
+            </div>                    
+            <div v-else>
+              <v-icon large >favorite</v-icon>  
+            </div>
+            </v-btn>
+            <br>
+
+          <div class="title">color</div>
+         <div class="inlineradio color" v-for="color in dproduct.color">
+           <!-- <p>{{color.color}}</p>  -->
+            <v-radio  v-model="colors" :value="color.color" v-bind:style="{ 'background-color': `${color.hex_code}`,height: '50px',width: '50px' }">
+            </v-radio>
+         </div>
+
+         <div class="title">Size : {{productSize}}</div>
          <div class="inlineradio size" v-for="item in dproduct.size_available">
             <!-- <input type="radio" name="size" value="item.product_variation_id"> {{item.size}}<br> -->
             <v-radio  v-bind:label="`${item.size}`" v-model="productSize" :value="item.product_variation_id">
             </v-radio>
          </div>
              <div class="quantity">
-                <label class="title" >Quantity</label> <br>
+                <label class="title" >Quantity</label> <br> 
                 <div>{{quantity}}</div>
                 <div @click= "inc(dproduct.size_available)"> + </div>
                 <div @click= "dec(dproduct.size_available)"> - </div>
              </div>
-             <!-- <p>{{dproduct}}</p> -->
            <!-- <div class="quantity">
                       <label class="title" >Quantity</label> <br>
                       <div>{{dproduct.quantity}}</div>
@@ -72,6 +108,9 @@
                    </div>  -->  
                <v-btn @click.native='addtoCart()' class="green" block secondary >Add to Cart</v-btn>                  
          <br><br>
+        <!-- <a href="whatsapp://send?text=aa17fa1a.ngrok.io/products/1017">share on whatsapp</a> -->
+        <v-btn v-clipboard:copy="'localhost:3000/'+$route.fullPath" v-clipboard:success="onCopy" >submit</v-btn>
+        <br><br>
          <v-expansion-panel expand>
             <v-expansion-panel-content>
                <div slot="header">BRAND DETAILS</div>
@@ -89,6 +128,29 @@
             </div>       
           </v-card>
         </v-dialog>
+        <div v-if="dproduct">
+            <v-layout row justify-center style="position: relative;">
+            <v-dialog v-model="dialog" class="already" lazy absolute>
+              <!-- <v-btn primary dark slot="activator">Open Dialog</v-btn> -->
+               <div v-if="dproductloading">
+                <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
+              </div>
+              <div v-else>
+                <v-card>
+                <v-card-title>
+                  <div class="headline">Alert</div>
+                </v-card-title>
+                <v-card-text>Product "<b> {{dproduct.title}} </b>" already added in cart, do you want to increse count or discard adding product</v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn class="green--text darken-1" flat="flat" @click.native="dialog = false">Disagree</v-btn>
+                  <v-btn class="green--text darken-1" flat="flat" @click.native="putnewQuantity()">Agree</v-btn>
+                </v-card-actions>
+              </v-card>
+              </div>              
+            </v-dialog>
+          </v-layout>
+        </div>
     </v-layout>
     </div>
    </main>
@@ -99,6 +161,8 @@ import axios from 'axios'
 import eventHub from '~plugins/event-hub'
 import NoSSR from 'vue-no-ssr'
 import InfiniteLoading from './InfiniteLoading.vue'
+import { inc , dec } from '../utils/commonFunction'
+
 import {
     setproductlist,
     getproductlistFromLocalStorage
@@ -116,12 +180,30 @@ import {
 
 export default {
 
+    asyncData ({ params, store },callback) {
+    let config = { Authorization : store.getters.getToken.toString() }
+    let url = "http://52.52.8.87/api/v2/user/love/"
+    console.log('asyncData')
+   return  axios.get(url, { headers: config })
+    .then((res) => {
+        //console.log(JSON.stringify(response.data.data[0].data))     
+        callback(null, { 
+          lovelist: response.data.data[0].data
+        })   
+      })
+    },
+
     data() {
         return {
             list: [],
+            //lovelist:[],
+            bcItems:[],
+            love: null,
             quantity: 1,
             from_doc: 0,
+            colors:'',
             loading: true,
+            dialog:false,
             dialog_mob: false,
             active: false,
             dproduct: null,
@@ -135,10 +217,56 @@ export default {
             productSize: null,
             offsetTop: 0,
             imgCounter: 0,
-            quantity: 1
+            noProductsFound : false,
+            dproductloading: true
         }
     },
     methods: {
+      geturl : function(){
+          let url = " document.URL"
+          alert(url)
+          return url
+      },
+      onCopy:function(e){        
+        alert("coupon code coipied")
+      },
+      togglelove : function(pid){
+
+        this.love = ! this.love
+
+        let vm = this
+        let url = "http://52.52.8.87/api/v2/user/love/" + pid
+        let config = { Authorization : this.$store.getters.getToken.toString() } 
+        axios.get(url, { headers: config } )
+        .then(response => {
+              console.log(response.data.data[0].data)
+              let result = response.data.data[0].data == 'Loved' ? true : false
+             // vm.$router.go()
+              // vm.love = result
+              // vm.islove()
+            })
+      },
+      islove : function(pid){
+        let vm = this
+        let val = null
+        let url = "http://52.52.8.87/api/v2/user/love/"
+        let config = { Authorization : this.$store.getters.getToken.toString() }
+        axios.get(url, { headers: config } )
+        .then(response => {
+           console.log(JSON.stringify(response.data.data[0].data))
+           let p = response.data.data[0].data.filter(function(obj){
+              return obj.id == 104
+            })
+          if(p.length){
+            val = true
+          } else {
+             val = false
+          }
+        })
+
+        return val
+          
+      },
         inc: function(sizearr) {
 
             if (this.productSize == null) {
@@ -217,34 +345,120 @@ export default {
         opendialog(product) {
             this.dialog_mob = true
             this.dproduct = product
+
+            
             console.log(this.dproduct)
         },
         removeDecimal(val) {
             return val.substring(0, val.indexOf('.'));
         },
-        redirectcard: function(product) {
-            //this.$nuxt.$router.replace('?pid=' + product.id)
+        repostionScroll() {
+          let pos = window.localStorage.scrollY
+          let data = window.localStorage.productlist
+          console.log(JSON.parse(data))
+          this.list = JSON.parse(data)
+           // let currpos = window.scrollY
+           //alert(pos + " and " + currpos)
+          console.log("pos from close dialog" + pos)
+          window.scrollTo(0,pos - 100)
+        },
+        closedialog: function(){
+
+          let pos = window.localStorage.scrollY  
+          window.scrollTo(0,pos)
+          //this.$router.push('pdlist',this.repostionScroll) 
+          //this.$router.go(-1)
+          this.dialog_mob = false
+          //          
+        },
+        indivisualproduct: function(product){
+
+          if(this.$store.getters.getToken.split('Token')[1].trim() == 'null'){
+            this.redirectcardviacache(product)
+          } else {
+            this.redirectcard(product)
+          }
+
+        },
+        redirectcardviacache:function(product) {
+            
+            let position = window.scrollY
+            console.log("window.scrollY" + window.scrollY)
+            window.localStorage.setItem('scrollY', position)
             delete window.$nuxt.$route.query['pid']
             let str=''
             let obj= window.$nuxt.$route.query            
             for(var i in obj){
-              str = i + '=' + obj[i]
+              str += i + '=' + obj[i]
               str= '&' + str
             }
             //let query = '/pdlist?'+this.$nuxt.$route.fullPath.split('?')[1] +'&pid=' + product.id
             let query = '/pdlist?pid=' + product.id + str
             this.$nuxt.$router.replace(query)
             this.dproduct = product
+            this.dialog_mob = true         
+        },
+        redirectcard: function(product) {
+            //this.$nuxt.$router.replace('?pid=' + product.id)
+            this.dproduct = product             
+            let position = window.scrollY
+            console.log("window.scrollY" + window.scrollY)
+            window.localStorage.setItem('scrollY', position)
+
+            delete window.$nuxt.$route.query['pid']
+            let str='', strarr = []
+            let obj= window.$nuxt.$route.query 
+            let objkeys = Object.keys(obj)
+            let objvalues = Object.values(obj)
+
+            this.bcItems = []
+            this.bcItems.push('Discover')            
+            //this.bcItems.push(objkeys)
+            let vm = this
+
+            objkeys.forEach(function(value,i){
+              vm.bcItems.push(objvalues[i])
+              strarr[i]= value + '=' + objvalues[i]
+            })
+            str = '&' + strarr.join('&')
+            // for(var i in obj){             
+            //   str =  i + '=' + obj[i]
+            //   str= '&' + str                          
+            // }
+            //let query = '/pdlist?'+this.$nuxt.$route.fullPath.split('?')[1] +'&pid=' + product.id
+            let query = '/pdlist?pid=' + product.id + str
+            this.$nuxt.$router.replace(query)
+            // let vm =  this
+            let config = { Authorization : vm.$store.getters.getToken.toString() }
+            axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+ product.id}`, { headers: config } )
+                .then((res) => {
+                    console.log(res.data.data[0].products)
+                    //vm.dproductloading = false
+                    //vm.dproduct = res.data.data[0].products
+                    vm.love = res.data.data[0].products.dproduct.is_loved
+                })
+
+            //this.dproduct = product
             this.dialog_mob = true
         },
         loaddialogdirectly: function(pid) {
             let vm = this
             vm.dialog_mob = true
             //alert(pid)
-            axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+pid}`)
+            this.bcItems.push('Discover') 
+            let obj= window.$nuxt.$route.query 
+            let objvalues = Object.values(obj)
+            delete objvalues[0  ]
+            objvalues.forEach(function(value,i){
+              vm.bcItems.push(value)             
+            })
+
+            let config = { Authorization : vm.$store.getters.getToken.toString() }
+            axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+pid}`, { headers: config } )
                 .then((res) => {
                     console.log(res.data.data[0].products)
                     vm.dproduct = res.data.data[0].products
+                    vm.love = res.data.data[0].products.is_loved
                 })
                 .catch((error) => {
                     console.log(error)
@@ -276,12 +490,16 @@ export default {
             }
 
         },
+        viacategory : function(){
+          let q = vm.$nuxt.$route.query
+           return q.category
+        },
         filterpanel: function(vm,filter) {
           let fltr= ''
           if (typeof(filter) != "undefined") {
               fltr = '&applied_filter=' + JSON.stringify(filter)
             }
-            return fltr
+            return filter
         },
         searchquery: function(vm) {
             let q = vm.$nuxt.$route.query
@@ -291,16 +509,18 @@ export default {
                 search = {
                 query: [val]
                 }
-              search = JSON.stringify(search)
+
+              //search = JSON.stringify(search)
               console.log(search)
-              search =  "&applied_filter=" + search
+              //search =  "&applied_filter=" + search
               return search
             }
         },
 
-        onInfinite: function(byfilter) {
+        onInfinite: function(param) {
             //alert("infinite scroll")
-            if (window.screen.width <= 920) {
+            // if (window.screen.width <= 920) {
+              if (true) {
 
                 let vm = this
                 let config = {
@@ -316,62 +536,143 @@ export default {
 
                 //get filter from store
                 let fltr = this.$store.getters.getfilter
-                console.log("fltr")
-                console.log(fltr)
                 let filterQuery 
                 if(fltr){
+                  if(Object.keys(fltr).length){
                     filterQuery = vm.filterpanel(vm,fltr)                  
+                  } 
                 }
 
-                if(byfilter){
-                  this.from_doc = 0
-                }
+                if(param){
+                  this.from_doc = 0                  
+                } 
 
+                let cat_query,sub_cat 
+
+                //category from query parameter
+                if(param != undefined && param !=true && this.from_doc == 0){
+                   cat_query = param.split('/')[0]
+                   sub_cat = param.split('/')[1]
+                } else {
+                     cat_query = vm.$nuxt.$route.query.category
+                } 
+
+                  //
+                 let category = {"parent_category_name":[cat_query]}
+                 let sub_category = {"category":[sub_cat]}
+                 if(sub_category.category[0] != undefined){
+                  category = Object.assign(category,sub_category)
+                 }
+
+                 console.log(category)
+                 
                 let fd = this.from_doc
                 let url = 'http://52.52.8.87/api/v2/catalogue/elastic-products/'
                 let limits = '?from_doc=' + fd + '&size=' + vm.size
                 url = url + limits
 
-                if(searchQuery)
-                url = url + searchQuery
-                if(filterQuery)
-                url = url + filterQuery  
+                // if(searchQuery || filterQuery){
+                  
+                // } 
+
+
+                if(searchQuery){
+                  if(searchQuery && filterQuery){                    
+                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(Object.assign(searchQuery,filterQuery)).replace(/\\/g, ""))
+                  }
+                  else if(searchQuery){
+                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(searchQuery))
+                  } 
+                } else if(Object.values(category.parent_category_name)[0] != undefined){
+                  if(category.parent_category_name && filterQuery != '{}' && filterQuery != undefined ){
+                  url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(Object.assign(category,filterQuery)).replace(/\\/g, ""))
+                  }else if(category.parent_category_name){
+                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(category))
+                  } 
+                } else if (filterQuery) {
+                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(filterQuery).replace(/\\/g, ""))
+                } else{
+                  url = url
+                }
+                
+
+                // if(searchQuery)
+                // url = url + searchQuery
+                // if(filterQuery)
+                // url = url + filterQuery 
+                // if(category)
+                //  url = url +  category
+
+               
 
                 if (typeof(filterQuery) != "undefined") {
-                    if (byfilter) {
+                    if (param) {
                        // url = url + "&applied_filter=" + search
                         axios.get(url)
                             .then((res) => {
                                 vm.list = []
                                 //vm.list = vm.list.concat(res.data.data[0].products)
+                                let totalProduct = res.data.data[0].total_documents
+                                let productCount = res.data.data[0].products.length
+                                
+                                if(totalProduct == 0 ){
+                                  vm.noProductsFound = true
+                                  return
+                                }
+
+                                if(productCount){
                                 vm.list = vm.list.concat(res.data.data[0].products)
                                 fd = fd + 12
                                 vm.from_doc = fd
                                 vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+                              } 
 
                             })
                     } else {
                         axios.get(url)
                             .then((res) => {
                                 //callback(null, { products: res.data.data[0].products })
-                                vm.list = vm.list.concat(res.data.data[0].products)
-                                fd = fd + 12
-                                vm.from_doc = fd
-                                vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-                                vm.fd_page = vm.fd_page + 1
-                                //vm.$nuxt.$router.replace('/pdlist?page='+ vm.fd_page)
+                                let totalProduct = res.data.data[0].total_documents
+                                let productCount = res.data.data[0].products.length
+                                
+                                if(totalProduct == 0 ){
+                                  vm.noProductsFound = true
+                                  return
+                                }
+
+                                if(productCount){
+                                  vm.list = vm.list.concat(res.data.data[0].products)
+                                  fd = fd + 12
+                                  vm.from_doc = fd
+                                  vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');  
+                                } else {
+                                  // vm.noProductsFound = true
+                                }
+                                
+                                //vm.fd_page = vm.fd_page + 1
+                                //window.localStorage.setItem('scrollY', window.scrollY)
+                                //vm.$nuxt.$router.replace('?page='+ vm.fd_page)
                             })
                     }
                 } else {
                     axios.get(url)
                         .then((res) => {
                             //callback(null, { products: res.data.data[0].products })
-                            vm.list = vm.list.concat(res.data.data[0].products)
-                            fd = fd + 12
-                            vm.from_doc = fd
-                            vm.$store.commit('setFromDoc', JSON.stringify(vm.from_doc))
-                            vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+                            let totalProduct = res.data.data[0].total_documents
+                            let productCount = res.data.data[0].products.length
+                            
+                            if(totalProduct == 0 ){
+                                  vm.noProductsFound = true
+                                  return
+                                }
 
+                            if(productCount){
+                              vm.list = vm.list.concat(res.data.data[0].products)
+                              fd = fd + 12
+                              vm.from_doc = fd
+                              vm.$store.commit('setFromDoc', JSON.stringify(vm.from_doc))
+                              vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');                              
+                            } 
                         })
                 }
                 vm.$store.commit('setproductlist', JSON.stringify(vm.list))
@@ -445,6 +746,19 @@ export default {
                     })
             }
         },
+        putnewQuantity: function(){
+            let vm = this
+            // let url =  'http://52.52.8.87/api/v2/cart/' + this.size
+            //  axios.put(url, {"quantity": this.quantity},
+            //     { headers: {'Authorization': "Token " + vm.$store.state.token}})
+            //     .then((res) => {
+            //        console.log(res.data)
+            //      })
+            //     .catch((e)=>{
+            //       console.log(e)
+            //       vm.dialog = true
+            //     })
+      },
 
         //   onInfinite(filter) {
         //     let fltr = ""
@@ -522,11 +836,12 @@ export default {
     created() {
         //console.log("infiite ")
         eventHub.$on('emitfilter', this.onInfinite)
-
-        console.log("Store value for scrollY" + window.localStorage.scrollY)
-        let cy = window.localStorage.scrollY
-        console.log(typeof(cy))
-        window.scroll(0, parseInt(cy))
+        eventHub.$on('emitCategory', this.onInfinite)
+      
+        // console.log("Store value for scrollY" + window.localStorage.scrollY)
+        // let cy = window.localStorage.scrollY
+        // console.log(typeof(cy))
+        // window.scroll(0, parseInt(cy))
     },
     components: {
         infiniteLoading: InfiniteLoading,
@@ -536,7 +851,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 /*  .scrollparent {
     max-height: 1000px;
     overflow:hidden;
@@ -546,6 +861,10 @@ export default {
     overflow-y: scroll;
     padding-right: -10px;
   }*/
+
+  i.icon.icon--large.material-icons.redheart {
+    color : red;
+  }
 
     .dragme{
      touch-action:pan-down !important;
@@ -671,5 +990,8 @@ export default {
   }
   .fix{
     position: fixed;
+  }
+  .already .card {
+    margin-bottom: 0px !important;
   }
 </style>

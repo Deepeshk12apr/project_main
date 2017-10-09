@@ -11,7 +11,7 @@
     "heroku-postbuild": "npm run build"
   },
   "engines": {
-    "node": "6.11.1"
+    "node": "8.4.0"
   },
   "dependencies": {
     "@nuxtjs/component-cache": "^1.1.0",

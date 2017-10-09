@@ -9,6 +9,9 @@
     "start": "nuxt start",
     "generate": "nuxt generate"
   },
+  "engines": {
+    "node": "6.11.1"
+  }
   "dependencies": {
     "@nuxtjs/component-cache": "^1.1.0",
     "axios": "^0.16.2",

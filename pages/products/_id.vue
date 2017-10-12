@@ -1,15 +1,16 @@
 <template>
-   <main>
-      <v-flex xs4>
+   <main class="product_main">
+      <div>
+        {{updatebread}}
          <v-breadcrumbs divider="/">
             <v-breadcrumbs-item 
-               v-for="item in items" :key="item.text"
+               v-for="item in product_route" :key="item"
                :disabled="item.disabled"
                >
-               {{ item.text }}
+               {{ item }}
             </v-breadcrumbs-item>
          </v-breadcrumbs>
-      </v-flex>
+      </div>
       <!-- <v-touch v-on:swipeleft="onSwipeLeft">Swipe me!</v-touch> -->
       <!-- <p>{{product}}</p> -->
       <!-- <p>{{date}}</p> -->
@@ -42,7 +43,7 @@
                  <img id="imgOne" :src='product.images[4]' data-imgid=4 >
             </div></div> -->
          <br>
-         <div class="title">RS {{product.listing_price}}</div>
+         <div class="title">&#8377 {{product.listing_price}}</div>
         <v-btn icon :ripple="false" @click.native="togglelove(product.id)">
             <!-- <p>{{product.is_loved}}</p> -->
             <div v-if="product.is_loved">
@@ -69,8 +70,8 @@
          <div class="quantity">
             <label class="title" >Quantity</label> <br>
             <div>{{quantity}}</div>
-            <div @click= "inc()"> + </div>
-            <div @click= "dec()"> - </div>
+            <div @click= "inc(product.size_available)"> + </div>
+            <div @click= "dec(product.size_available)"> - </div>
          </div>
          <v-btn @click.native='addtoCart()' class="green" block secondary >Add to Cart</v-btn>
          <br><br>
@@ -91,41 +92,87 @@
       </div>
       <div>
          <v-layout row class="hidden-sm-and-down">
-            <v-flex class="smallImg_container" offset-md2 offset-lg2 >
+            <div class="smallImg_container">
                <ul v-for= "img in product.images">
                   <li><img class="small_img" :src='img' @click='changeImg(img)' ></li>
                </ul>
-            </v-flex>
-            <v-flex md4 lg4>
+            </div>
+            <div>
                <img id="p_img" class="web_img" :src='product.images[0]' >
-            </v-flex>
-            <v-flex md5 lg5 class="web_productData">
+            </div>
+            <div class="web_productData">
                <div class="headline">{{product.title}}</div>
                <div class="title brand">{{product.brand.brand}}</div>
-               <div class="title price">RS {{product.listing_price}}</div>
-               <div class="title">color</div>
+               <div class="title price">&#8377 {{product.listing_price}}</div>
+               <div class="label_title color">color</div>
                <div class="inlineradio color" v-for="color in product.color">
-                  <v-radio v-bind:label="`${color}`" v-model="colors" :value="color" v-bind:style="{ 'background-color': `${color}`,height: '50px',width: '50px' }">
+                  <v-radio  v-model="colors" :value="color.color" v-bind:style="{ 'background-color': `${color.hex_code}`,height: '40px',width: '40px',margin:'0px' }">
                   </v-radio>
                </div>
-               <div class="title">Size : {{size}}</div>
+               <div class="label_title size">Size : {{size}} </div>
                <div class="inlineradio size" v-for="item in product.size_available">
                   <!-- <input type="radio" name="size" value="item.product_variation_id"> {{item.size}}<br> -->
-                  <v-radio  v-bind:label="`${item.size}`" v-model="size" :value="item.product_variation_id">
+                  <v-radio  v-bind:label="`${item.size}`" v-model="size" :value="item.product_variation_id"
+                     v-bind:style="{ height: '40px',width: '40px',margin:'0px' }"
+                  >
                   </v-radio>
                </div>
-               <br>  
-               <a href="/">Size Guide</a>
+               <br>
+               <div class="sizeGuide" >
+                <a href="/">Size Guide</a>  
+               </div>               
                <div class="quantity">
-                  <label class="title" >Quantity</label> <br>
-                  <div>{{quantity}}</div>
-                  <div @click= "inc()"> + </div>
-                  <div @click= "dec()"> - </div>
+                  <label class="label_title" >Quantity</label> <br>
+                  <div class="count">{{quantity}}</div>
+                  <div class="inc" @click= "inc(product.size_available)"> + </div>
+                  <div class="dec" @click= "dec(product.size_available)"> - </div>
                </div>
-               <v-btn @click.native='addtoCart()' class="green" block secondary >Add to Cart</v-btn>
-               <br><br>
-            </v-flex>
+               <v-btn @click.native='addtoCart()' class="green addtocart" block secondary >Add to Cart</v-btn>
+               <div class="Notify-me-when-avail ">
+                 <a href="/">Notify me when available</a>
+               </div>
+            </div>
          </v-layout>
+         <div class="hidden-sm-and-down">
+            <v-tabs fixed centered>
+                <v-tabs-bar class="white">
+                  <v-tabs-slider class="black"></v-tabs-slider>
+                  <v-tabs-item
+                    v-for="(item,i) in tabitems"
+                    :key="i"
+                    @click.native="showcontent(i)"
+                  >
+                    {{ item }}
+                  </v-tabs-item>
+                </v-tabs-bar>
+                <v-tabs-items>
+                <!-- <p>{{item}}</p> -->
+                  <v-tabs-content
+                    v-for="i in tabitems"
+                    :key="i"
+                    :id="'tab-' + i"
+                  >
+                    <v-card flat>
+                      <!-- <v-card-text>{{ i }}</v-card-text> -->
+                      <v-card-text>
+                        <p>Shipping is free on purchases above Rs. 3000. Shipping charges are non-refundable in case of returns.</p>
+                        <p>You have a full 24 hours to return your products starting from the day you received your order. All you have to do is fill in your details here: <a href="https://goo.gl/forms/QWtT0I4cPc8bVsNt2">Return/Exchange</a>.</p>
+                      </v-card-text>
+                    </v-card>
+                  </v-tabs-content>
+                </v-tabs-items>
+            </v-tabs>
+            <div class="Share-with-a-friend ">
+              Share with a friend
+              <div>
+                <a href="'whatsapp://send?text=localhost:3000/'+$route.fullPath">
+                  <img class="shareicons" src="https://i.pinimg.com/originals/b3/dd/83/b3dd835904f90189f282cd5ed1cbaaba.png">
+                </a>
+                <img class="shareicons" src="http://store-images.s-microsoft.com/image/apps.7488.13510798886918977.69182166-f125-495d-80d2-44fdaab21523.8fcea13e-5d9a-48a9-9937-b26deeced1b5">
+                <img class="shareicons at" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/At_Sign_Nimbus.svg/2000px-At_Sign_Nimbus.svg.png">
+              </div>
+            </div>
+          </div>  
          <!-- alert dialog -->
            <v-layout row justify-center style="position: relative;">
             <v-dialog v-model="dialog" lazy absolute>
@@ -200,7 +247,14 @@ export default {
       // context: '',
       // mode: '',
       // timeout: 6000,
-      date: Date.now(),
+      // },
+      tabitems: ['PRODUCT DETAILS', 'BRAND DETAILS', 'DELIVERY INFO','RETURNS POLICY'],
+      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',      
+      product_details:null,
+      brand_details: null,
+      delivery_info:null,
+      return_policy:"You have a full 24 hours to return your products starting from the day you received your order. All you have to do is fill in your details here: Return/Exchange. Once your return is confirmed, pack and seal the item, just as it was delivered to you, before handing it over to our delivery partner. Zapyle will not be responsible for any loss or theft due to the packing condition upon return. The product must be unused, unwashed and all tags must be intact. Place the invoice outside the packet, so that the return address is visible.",
+      product_route:[],
       snackdata:{
         //snackbar: true,
         y: 'top',
@@ -215,7 +269,7 @@ export default {
       imgCounter:0,
       quantity:1,
       swipeDirection: 'None',
-      size:9,
+      size:null,
       colors:null,
       path:[],
       items: [
@@ -241,9 +295,34 @@ export default {
             vm.snackdata.snackbar = true
             vm.snackdata.snacktext = "product  there"
             return vm.snackdata
+    },
+    updatebread:function(){
+      this.product_route.push('Discover') 
+            let obj= this.$route.query 
+            let objvalues = Object.values(obj)
+            delete objvalues[0  ]
+            objvalues.forEach(function(value,i){
+              vm.product_route.push(value)             
+            })
     }
   },
     methods: {
+      showcontent: function(id){
+        // alert(id)
+        let elem = this.tabitems[id]
+        let elemid= "tab-" + this.tabitems[id]
+        let localArr = ['PRODUCT_DETAILS', 'BRAND_DETAILS', 'DELIVERY_INFO','RETURNS_POLICY']
+        // let doc = document.getElementById(elemid).show()
+        this.tabitems.forEach(function(obj){
+            if(obj ==  elem){
+              // alert(obj)
+              document.getElementById("tab-"+obj).style.display = "block"
+            } else {
+              // alert(obj)
+              document.getElementById("tab-"+obj).style.display = "none"
+            }
+        })
+      },
       togglelove : function(pid){
 
         let vm = this
@@ -319,19 +398,51 @@ export default {
       quantityUpdate: function(quantity,item){
 
       },
-      inc : function(itemid){
-        console.log("itemid is " + itemid)
-        this.quantity++
-        this.quantityUpdate(quantity,itemid)
-        //return  this.quantity++
-      },
-      dec : function(quantity,itemid){
-        console.log("itemid is " + itemid)
-        quantity--
-        quantity = -1 * quantity
-        this.quantityUpdate(quantity,itemid)
-        //return  this.quantity--
-      },
+      // inc : function(itemid){
+      //   console.log("itemid is " + itemid)
+      //   this.quantity++
+      //   this.quantityUpdate(quantity,itemid)
+      //   //return  this.quantity++
+      // },
+      // dec : function(quantity,itemid){
+      //   console.log("itemid is " + itemid)
+      //   this.quantity--
+      //   this.quantity = -1 * quantity
+      //   this.quantityUpdate(quantity,itemid)
+      //   //return  this.quantity--
+      // },
+       inc: function(sizearr) {
+
+            if (this.size == null) {
+                alert('select size first')
+                return
+            }
+            let vm = this
+            let quantity_available = sizearr.map(function(obj) {
+                if (obj.product_variation_id == vm.size)
+                    return obj.quantity
+            })
+
+            if (this.quantity == quantity_available[0]) {
+                alert("No more products available")
+            } else {
+                this.quantity = this.quantity + 1
+            }
+            //return  this.quantity++
+        },
+        dec: function(sizearr) {
+            if (this.size == null) {
+                alert('select size first')
+                return
+            }
+            if (this.quantity > 1) {
+                this.quantity = this.quantity - 1
+            } else {
+                alert('min anount in cart')
+            }
+
+            //return  this.quantity--
+        },
       // addtoCart: function(){
 
       //   let vm = this
@@ -452,6 +563,12 @@ export default {
 
 <style>
   /*enabling vertical dragging on img*/
+
+  .product_main{
+    max-width: 986px;
+    margin: auto;
+  }
+
   .dragme{
      touch-action:pan-down !important;
      user-select: none !important; 
@@ -487,59 +604,139 @@ export default {
     padding: 10px;
   }
   .inlineradio  {
-    display: inline-flex;
+    display: inline-block;
    /* padding-left: 15px;
     padding-right: 15px;*/
   }
   .size .input-group__input, .color .input-group__input{
     visibility: hidden;
   }
+
+  .input-group.input-group--selection-controls .input-group__input{
+    visibility: hidden;
+  }
   .size .input-group--selection-controls label, .color .input-group--selection-controls label{
     margin-left: 0;
     position: relative;
-    height: 50px;
-    width: 50px;
+    height: 40px;
+    width: 40px;
     padding: 12px;
   }
   .quantity div{
-    margin: 10px 10px 25px 10px;
+    margin: 10px 10px 0px 10px;
     position: relative;
-    height: 50px;
-    width: 50px;
+    height: 40px;
+    width: 40px;
     padding: 12px;
-    font-size: 20px;
-    background-color: grey;
+    font-size: 14px;
+    background-color: #eaebf0;
     display: inline-block;
   }
   .quantity{
-    margin: 25px 0 25px 0;
+    margin: 20px 0 20px 0;
   }
   .size .input-group--selection-controls label{
-    background-color: grey;
+    background-color: #eaebf0;
   }
   .input-group__details{
     display: none;
   }
   .web_img{
-    max-width: 100%;
-    height:auto;
-    padding: 10px 20px 10px 20px;
+    /*max-width: 100%;*/
+    width: 420px;
+    /*height:auto;*/
+    height: 560px;
+    /*padding: 10px 20px 10px 20px;*/
+    margin-right: 40px;
+    margin-left: 20px;
   }
   .small_img{
-    width: 100px;
-    height: auto;
+    width: 60px;
+    height: 80px;
   }
-  .web_productData .price,
+
+  .web_productData .price{
+    margin-top: 20px;
+    /*margin-bottom: 20px;*/
+    font-size: 20px !important;
+
+  }
   .web_productData .brand,
   .web_productData .headline{
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    color: #47525f;
+    font-size: 20px !important;
+  }
+  .web_productData .brand{
+    font-size: 14px !important;
+  }
+  .label_title{
+    font-family: Roboto;
+    font-size: 14px;
+    line-height: 1.43;
+    text-align: left;
+    color: #47525f;
+  }
+  .label_title.color,.label_title.size{
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+  .sizeGuide{
+    margin-top: 10px;
+  }
+  .sizeGuide a {
+    font-size: 12px;
+    line-height: 1.67;
+    text-align: left;
+    color: #47525f;
+  }
+  .inc,.dec{
+    cursor: pointer;
   }
   .smallImg_container{
     height: 600px;
+    margin-bottom: 5px;
   }
 
   i.icon.icon--large.material-icons.redheart {
     color : red;
   }
+  .addtocart{
+     width: 335px;
+     height: 60px;
+  }
 
+  .Notify-me-when-avail {
+  width: 156px;
+  height: 40px;
+      margin-left: 95px;
+    margin-top: 20px;
+}
+  .Notify-me-when-avail a {    
+  font-family: Roboto;
+  font-size: 14px;
+  line-height: 2.86;
+  text-align: left;
+  color: #13b868;
+  }
+
+  .Share-with-a-friend {
+  width: 151px;
+  height: 40px;
+  font-family: Roboto;
+  margin-top: 60px !important;
+  margin: auto;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 2.22;
+  text-align: center;
+  color: #47525f;
+  }
+.shareicons {
+  width: 40px;
+  height: 40px;
+}
+.at{
+  padding:6px;
+}
 </style>

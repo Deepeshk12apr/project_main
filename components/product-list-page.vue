@@ -248,7 +248,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 /*  .scrollparent {
     max-height: 1000px;
     overflow:hidden;

@@ -1,50 +1,106 @@
 <template>
-   <main>
+   <main class="pdlist_main">
       <div   class="loader"  v-if="list.length > 0">
       </div>
       <div v-else>
          <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
       </div>
       <!-- <div>{{offsetTop}}</div> -->
-      <div class="">      
-      <v-layout class="inline product" row wrap>
-         <div v-if="noProductsFound">
-           <h4>No products found </h4>
-         </div>
-         <!-- <div v-else> -->
+      <div class="">
+         <v-layout class="inline product" row wrap>
+            <div v-if="noProductsFound">
+               <h4>No products found </h4>
+            </div>
+            <!-- <div v-else> -->
             <v-flex xs6 sm4 md3  v-for="product in list" :key="product.title" >
-            <!-- <nuxt-link :to="'/pdlist/'+product.id"> -->
-               <v-card @click="indivisualproduct(product)">
-               <!-- <v-card @click="loaddialogdirectly(product.product_attr_id)"> -->
-                  <v-card-media :src="product.images[0]" height="150px">
+               <!-- <nuxt-link :to="'/pdlist/'+product.id"> -->
+               <v-card class="product_card" @click="indivisualproduct(product)">
+                  <!-- <v-card @click="loaddialogdirectly(product.product_attr_id)"> -->
+                  <v-card-media :src="product.images[0]" height="240px" widht="180px !important">
                   </v-card-media>
                   <!-- <p>{{product.images}}</p> -->
-                  <v-card-title>
-                     <div class="product_data">
-                        <p class="subheading">{{product.brand}}</p>
-                        <!-- <p class="body-1 mb-2 title">{{product.title}}</p> -->
-                        <p class= "body-1  listing_price"><b>&#8377 {{removeDecimal(product.listing_price)}}</b></p>
-                     </div>
-                  </v-card-title>
+                  <div class="product_data">
+                     <p class="label_brand">{{product.brand | capitalize}}</p>
+                     <p class="label_title">{{product.title}}</p>
+                     <p class= "listing_price"><b>&#8377 {{removeDecimal(product.listing_price)}}</b></p>
+                  </div>
+                  
                </v-card>
-            <!-- </nuxt-link> -->
-            <v-btn icon class="quickView" @click.native.stop="opendialog(product)">
-                 <v-icon>remove_red_eye</v-icon>
-            </v-btn>
-          </v-flex>
-          <infinite-loading :on-infinite="onInfinite" ref="infiniteLoading"></infinite-loading>          
-         <!-- </div> -->
-         <v-dialog class="hidden-md-and-up" v-model="dialog_mob" persistent fullscreen transition="dialog-bottom-transition" :overlay=false>
-          <v-card >
-          <v-toolbar dark absolute class="primary" scroll-off-screen scroll-target="#pdc">
-          <v-btn icon @click.native="closedialog" dark>
-            <v-icon>close</v-icon>
-          </v-btn>
-          </v-toolbar>
-          <!-- <p>{{dproduct}}</p> -->
-            <div id="pdc" class="dialogCard" v-if="dproduct">
-                  <!-- <p>{{dproduct}}</p> -->
-                    <v-flex xs4>
+               <!-- </nuxt-link> -->
+               <!-- <v-btn icon class="quickView" @click.native.stop="opendialog(product)">
+                  <v-icon>remove_red_eye</v-icon>
+               </v-btn> -->
+            </v-flex>   
+            <infinite-loading :on-infinite="onInfinite" ref="infiniteLoading"></infinite-loading>
+            <!-- </div> -->
+            <v-dialog id="dialogProduct"  v-model="dialog_mob" persistent fullscreen :transition="gettransition" :overlay=false>
+               <v-card v-if="dproduct" class ="hidden-sm-and-down ">
+                  <v-toolbar dark absolute class="primary" scroll-off-screen scroll-target="#pdc">
+                     <v-btn icon @click.native="closedialog" dark>
+                        <v-icon>close</v-icon>
+                     </v-btn>
+                  </v-toolbar>
+                  <v-layout row class="hidden-sm-and-down web_product">
+                     <div class="smallImg_container">
+                        <ul v-for= "img in dproduct.images">
+                           <li><img class="small_img" :src='img' @click='changeImg(img)' ></li>
+                        </ul>
+                     </div>
+                     <div>
+                        <img id="p_img" class="web_img" :src='dproduct.images[0]' >
+                     </div>
+                     <div class="web_productData">
+                        <div class="headline">{{dproduct.title}}</div>
+                        <div class="title brand">{{dproduct.brand.brand}}</div>
+                        <div class="title price">&#8377 {{dproduct.listing_price}}</div>
+                        <div class="label_title color">color</div>
+                        <div class="inlineradio color" v-for="color in dproduct.color">
+                           <v-radio  v-model="colors" :value="color.color" v-bind:style="{ 'background-color': `${color.hex_code}`,height: '40px',width: '40px',margin:'0px' }">
+                           </v-radio>
+                        </div>
+                        <div class="label_title size">Size: {{productSize}} </div>
+                        <div class="inlineradio size" v-for="item in dproduct.size_available">
+                           <v-radio  v-bind:label="`${item.size}`" v-model="productSize" :value="item.product_variation_id"
+                              v-bind:style="{ height: '40px',width: '40px',margin:'0px' }"
+                              >
+                           </v-radio>
+                        </div>
+                        <br>
+                        <div class="sizeGuide" >
+                           <a href="/">Size Guide</a>  
+                        </div>
+                        <div class="quantity">
+                           <label class="label_title" >Quantity</label> <br>
+                           <div class="count">{{quantity}}</div>
+                           <div class="inc" @click= "inc(dproduct.size_available)"> + </div>
+                           <div class="dec" @click= "dec(dproduct.size_available)"> - </div>
+                        </div>
+                        <v-btn @click.native='addtoCart()' class="green addtocart" block secondary >Add to Cart</v-btn>
+                        <div class="Notify-me-when-avail ">
+                           <a href="/">Notify me when available</a>
+                        </div>
+                     </div>
+                  </v-layout>
+                  <div class="hidden-sm-and-down">
+                     <div class="Share-with-a-friend ">
+                        Share with a friend
+                        <div>
+                           <a href="'whatsapp://send?text=localhost:3000/'+$route.fullPath">
+                           <img class="shareicons" src="https://i.pinimg.com/originals/b3/dd/83/b3dd835904f90189f282cd5ed1cbaaba.png">
+                           </a>
+                           <img class="shareicons" src="http://store-images.s-microsoft.com/image/apps.7488.13510798886918977.69182166-f125-495d-80d2-44fdaab21523.8fcea13e-5d9a-48a9-9937-b26deeced1b5">
+                           <img class="shareicons at" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/At_Sign_Nimbus.svg/2000px-At_Sign_Nimbus.svg.png">
+                        </div>
+                     </div>
+                  </div>
+               </v-card>
+               <v-card class ="hidden-md-and-up">
+                  <v-toolbar dark absolute class="primary" scroll-off-screen scroll-target="#pdc">
+                     <v-btn icon @click.native="closedialog" dark>
+                        <v-icon>close</v-icon>
+                     </v-btn>
+                  </v-toolbar>
+                  <div id="pdc" class="dialogCard" v-if="dproduct">
                      <v-breadcrumbs divider="/">
                         <v-breadcrumbs-item 
                            v-for="item in bcItems" :key="item"
@@ -53,112 +109,115 @@
                            {{ item }}
                         </v-breadcrumbs-item>
                      </v-breadcrumbs>
-                  </v-flex>
-                  <div class="headline">{{dproduct.title}}</div>
-                  <div class="title">{{dproduct.brand.brand}}</div>  
-                  <div class="title">&#8377 {{dproduct.listing_price}}</div>
-                              <no-ssr> 
-            <v-touch v-on:swipeleft="onswipeleft" v-on:swiperight="onswiperight" class="dragme">
-            <div id="imgcon" class="subcon">
-                 <img id="imgOne" :src='dproduct.images[0]' data-imgid=0 >
-                 <img id="imgOne" :src='dproduct.images[1]' data-imgid=1 >
-                 <img id="imgOne" :src='dproduct.images[2]' data-imgid=2 >
-                 <img id="imgOne" :src='dproduct.images[3]' data-imgid=3 >
-                 <img id="imgOne" :src='dproduct.images[4]' data-imgid=4 >
-            </div>
-            </v-touch>
-            </no-ssr>
-            <!-- <p>{{dproduct.is_loved}}</p> -->
-            <!-- <v-icon large color="blue darken-2">favorite</v-icon><br> -->
-            <p>{{love}}</p>
-            <v-btn icon :ripple="false" @click.native="togglelove(dproduct.id)">
-            <div v-if="love">
-              <v-icon large class="redheart" >favorite</v-icon>
-            </div>                    
-            <div v-else>
-              <v-icon large >favorite</v-icon>  
-            </div>
-            </v-btn>
-            <br>
-
-          <div class="title">color</div>
-         <div class="inlineradio color" v-for="color in dproduct.color">
-           <!-- <p>{{color.color}}</p>  -->
-            <v-radio  v-model="colors" :value="color.color" v-bind:style="{ 'background-color': `${color.hex_code}`,height: '50px',width: '50px' }">
-            </v-radio>
-         </div>
-
-         <div class="title">Size : {{productSize}}</div>
-         <div class="inlineradio size" v-for="item in dproduct.size_available">
-            <!-- <input type="radio" name="size" value="item.product_variation_id"> {{item.size}}<br> -->
-            <v-radio  v-bind:label="`${item.size}`" v-model="productSize" :value="item.product_variation_id">
-            </v-radio>
-         </div>
-             <div class="quantity">
-                <label class="title" >Quantity</label> <br> 
-                <div>{{quantity}}</div>
-                <div @click= "inc(dproduct.size_available)"> + </div>
-                <div @click= "dec(dproduct.size_available)"> - </div>
-             </div>
-           <!-- <div class="quantity">
-                      <label class="title" >Quantity</label> <br>
-                      <div>{{dproduct.quantity}}</div>
-                      <div @click= "inc(dproduct.id,dproduct.quantity,dproduct.quantity_available)"> + </div>
-                      <div @click= "dec(dproduct.id,dproduct.quantity,dproduct.quantity_available)"> - </div>
-                   </div>  -->  
-               <v-btn @click.native='addtoCart()' class="green" block secondary >Add to Cart</v-btn>                  
-         <br><br>
-        <!-- <a href="whatsapp://send?text=aa17fa1a.ngrok.io/products/1017">share on whatsapp</a> -->
-        <v-btn v-clipboard:copy="'localhost:3000/'+$route.fullPath" v-clipboard:success="onCopy" >submit</v-btn>
-        <br><br>
-         <v-expansion-panel expand>
-            <v-expansion-panel-content>
-               <div slot="header">BRAND DETAILS</div>
-               <v-card>
-                  <v-card-text class="grey lighten-3">{{dproduct.brand.brand}}  {{dproduct.brand.description}}</v-card-text>
+                     <div class="headline label_title">{{dproduct.title}}</div>
+                     <div class="title label_brand">{{dproduct.brand.brand}}</div>
+                     <no-ssr>
+                        <v-touch v-on:swipeleft="onswipeleft" v-on:swiperight="onswiperight" class="dragme">
+                           <div id="imgcon" class="subcon">
+                              <img id="imgOne" :src='dproduct.images[0]' data-imgid=0 >
+                              <img id="imgOne" :src='dproduct.images[1]' data-imgid=1 >
+                              <img id="imgOne" :src='dproduct.images[2]' data-imgid=2 >
+                              <img id="imgOne" :src='dproduct.images[3]' data-imgid=3 >
+                              <img id="imgOne" :src='dproduct.images[4]' data-imgid=4 >
+                           </div>
+                        </v-touch>
+                     </no-ssr>
+                     <div class="price_fav_block">
+                        <div class="title label_price inline-block" >&#8377 {{dproduct.listing_price}}</div>
+                        <div class="inline-block fav_block">
+                           <v-btn icon :ripple="false" @click.native="togglelove(dproduct.id)">
+                              <div v-if="love">
+                                 <v-icon large class="redheart" >favorite_border</v-icon>
+                              </div>
+                              <div v-else>
+                                 <v-icon large >favorite_border</v-icon>
+                              </div>
+                           </v-btn>
+                        </div>
+                     </div>
+                     <div class="label_part color">COLOUR</div>
+                     <div class="inlineradio color" v-for="color in dproduct.color">
+                        <v-radio  v-model="colors" :value="color.color" v-bind:style="{ 'background-color': `${color.hex_code}`,height: '40px',width: '40px',margin:'0px' }">
+                        </v-radio>
+                     </div>
+                     <div class="label_part size">SIZE : {{productSize}} </div>
+                     <div class="inlineradio size" v-for="item in dproduct.size_available">
+                        <v-radio  v-bind:label="`${item.size}`" v-model="productSize" :value="item.product_variation_id"
+                           v-bind:style="{ height: '40px',width: '40px',margin:'0px' }"
+                           >
+                        </v-radio>
+                     </div>
+                     <div class="sizeGuide" >
+                        <a href="/">Size Guide</a>  
+                     </div>
+                     <div class="quantity">
+                        <label class="label_part" >QUANTITIY</label> <br> 
+                        <div>{{quantity}}</div>
+                        <div @click= "inc(dproduct.size_available)"> + </div>
+                        <div @click= "dec(dproduct.size_available)"> - </div>
+                     </div>
+                     <v-btn @click.native='addtoCart()' class="green addtocart" block secondary >Add to Kart</v-btn>
+                     <br><br>                     
+                     <v-btn v-clipboard:copy="'localhost:3000/'+$route.fullPath" v-clipboard:success="onCopy" >submit</v-btn>
+                     <br><br>
+                     <v-expansion-panel expand>
+                        <v-expansion-panel-content>
+                           <div slot="header">BRAND DETAILS</div>
+                           <v-card>
+                              <v-card-text class="grey lighten-3">{{dproduct.brand.brand}}  {{dproduct.brand.description}}</v-card-text>
+                           </v-card>
+                        </v-expansion-panel-content>
+                        <v-expansion-panel-content >
+                           <div slot="header">PRODUCT DETAILS</div>
+                           <v-card>
+                              <v-card-text class="grey lighten-3">{{dproduct.description}}</v-card-text>
+                           </v-card>
+                        </v-expansion-panel-content>
+                     </v-expansion-panel>
+                     <div class="Share-with-a-friend ">
+                        Share with a friend
+                        <div>
+                           <a href="'whatsapp://send?text='+$route.fullPath">
+                           <img class="shareicons" src="https://i.pinimg.com/originals/b3/dd/83/b3dd835904f90189f282cd5ed1cbaaba.png">
+                           </a>
+                           <img class="shareicons" src="http://store-images.s-microsoft.com/image/apps.7488.13510798886918977.69182166-f125-495d-80d2-44fdaab21523.8fcea13e-5d9a-48a9-9937-b26deeced1b5">
+                           <img class="shareicons at" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/At_Sign_Nimbus.svg/2000px-At_Sign_Nimbus.svg.png">
+                        </div>
+                     </div>
+                  </div>
                </v-card>
-            </v-expansion-panel-content>
-            <v-expansion-panel-content >
-               <div slot="header">PRODUCT DETAILS</div>
-               <v-card>
-                  <v-card-text class="grey lighten-3">{{dproduct.description}}</v-card-text>
-               </v-card>
-            </v-expansion-panel-content>
-         </v-expansion-panel>
-            </div>       
-          </v-card>
-        </v-dialog>
-        <div v-if="dproduct">
-            <v-layout row justify-center style="position: relative;">
-            <v-dialog v-model="dialog" class="already" lazy absolute>
-              <!-- <v-btn primary dark slot="activator">Open Dialog</v-btn> -->
-               <div v-if="dproductloading">
-                <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
-              </div>
-              <div v-else>
-                <v-card>
-                <v-card-title>
-                  <div class="headline">Alert</div>
-                </v-card-title>
-                <v-card-text>Product "<b> {{dproduct.title}} </b>" already added in cart, do you want to increse count or discard adding product</v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn class="green--text darken-1" flat="flat" @click.native="dialog = false">Disagree</v-btn>
-                  <v-btn class="green--text darken-1" flat="flat" @click.native="putnewQuantity()">Agree</v-btn>
-                </v-card-actions>
-              </v-card>
-              </div>              
             </v-dialog>
-          </v-layout>
-        </div>
-    </v-layout>
-    </div>
+            <div v-if="dproduct">
+               <v-layout row justify-center style="position: relative;">
+                  <v-dialog v-model="dialog" class="already" lazy absolute>
+                     <!-- <v-btn primary dark slot="activator">Open Dialog</v-btn> -->
+                     <div v-if="dproductloading">
+                        <v-progress-circular indeterminate v-bind:size="70" v-bind:width="7" class="purple--text"></v-progress-circular>
+                     </div>
+                     <div v-else>
+                        <v-card>
+                           <v-card-title>
+                              <div class="headline">Alert</div>
+                           </v-card-title>
+                           <v-card-text>Product "<b> {{dproduct.title}} </b>" already added in cart, do you want to increse count or discard adding product</v-card-text>
+                           <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn class="green--text darken-1" flat="flat" @click.native="dialog = false">Disagree</v-btn>
+                              <v-btn class="green--text darken-1" flat="flat" @click.native="putnewQuantity()">Agree</v-btn>
+                           </v-card-actions>
+                        </v-card>
+                     </div>
+                  </v-dialog>
+               </v-layout>
+            </div>
+         </v-layout>
+      </div>
    </main>
 </template>
-
 <script>
 import axios from 'axios'
 import eventHub from '~plugins/event-hub'
+import filters from '~plugins/filters'
 import NoSSR from 'vue-no-ssr'
 import InfiniteLoading from './InfiniteLoading.vue'
 import { inc , dec } from '../utils/commonFunction'
@@ -192,7 +251,13 @@ export default {
         })   
       })
     },
-
+    // filters: {
+    //   capitalize: function (value) {
+    //     if (!value) return ''
+    //     value = value.toString()
+    //     return value.charAt(0).toUpperCase() + value.slice(1)
+    //   }
+    // },
     data() {
         return {
             list: [],
@@ -204,6 +269,7 @@ export default {
             colors:'',
             loading: true,
             dialog:false,
+            transition:null,
             dialog_mob: false,
             active: false,
             dproduct: null,
@@ -220,6 +286,18 @@ export default {
             noProductsFound : false,
             dproductloading: true
         }
+    },
+    computed :{
+      gettransition: function(){
+        let width = window.screen.width
+        if(width >= 1024){
+          this.transition = 'fade-transition'
+        } else {
+          this.transition = 'dialog-bottom-transition'
+        }
+        return this.transition
+        
+      }
     },
     methods: {
       geturl : function(){
@@ -267,14 +345,17 @@ export default {
         return val
           
       },
+      changeImg:function(img){ 
+          document.getElementById('p_img').src = img; 
+      },     
         inc: function(sizearr) {
-
-            if (this.productSize == null) {
+            let vm = this
+            if (vm.productSize == null) {
                 alert('select size first')
                 return
             }
             let quantity_available = sizearr.map(function(obj) {
-                if (obj.product_variation_id == 8772)
+                if (obj.product_variation_id == vm.size)
                     return obj.quantity
             })
 
@@ -405,7 +486,7 @@ export default {
             console.log("window.scrollY" + window.scrollY)
             window.localStorage.setItem('scrollY', position)
 
-            delete window.$nuxt.$route.query['pid']
+            delete this.$route.query['pid']
             let str='', strarr = []
             let obj= window.$nuxt.$route.query 
             let objkeys = Object.keys(obj)
@@ -435,7 +516,7 @@ export default {
                     console.log(res.data.data[0].products)
                     //vm.dproductloading = false
                     //vm.dproduct = res.data.data[0].products
-                    vm.love = res.data.data[0].products.dproduct.is_loved
+                    vm.love = res.data.data[0].products.is_loved
                 })
 
             //this.dproduct = product
@@ -560,7 +641,7 @@ export default {
                   //
                  let category = {"parent_category_name":[cat_query]}
                  let sub_category = {"category":[sub_cat]}
-                 if(sub_category.category[0] != undefined){
+                 if(sub_category.category[0] != undefined && sub_category.category[0] != "undefined"){
                   category = Object.assign(category,sub_category)
                  }
 
@@ -746,92 +827,6 @@ export default {
                     })
             }
         },
-        putnewQuantity: function(){
-            let vm = this
-            // let url =  'http://52.52.8.87/api/v2/cart/' + this.size
-            //  axios.put(url, {"quantity": this.quantity},
-            //     { headers: {'Authorization': "Token " + vm.$store.state.token}})
-            //     .then((res) => {
-            //        console.log(res.data)
-            //      })
-            //     .catch((e)=>{
-            //       console.log(e)
-            //       vm.dialog = true
-            //     })
-      },
-
-        //   onInfinite(filter) {
-        //     let fltr = ""
-        //     if (typeof(filter) != "undefined") {
-        //         if (filter.length > 0) {
-        //             let val = filter.join('","')
-        //             fltr = {
-        //                 brand: [val]
-        //             }
-        //             fltr = JSON.stringify(fltr)
-        //             console.log(fltr)
-        //         }
-        //     }
-
-        //     let vm = this
-        //     let config = {
-        //         Authorization: this.$store.state.token
-        //     }
-        //     let fd = this.from_doc
-        //     // let fd_page = (this.page - 1) * 12
-
-        //     let q = vm.$nuxt.$route.query
-
-        //     if(q.page){
-        //       console.log("has page"+ q.page)
-        //       vm.fd_page = 0
-        //       vm.size = q.page *12
-        //     }
-
-        //     let url = 'http://52.52.8.87/api/v2/catalogue/elastic-products/?shop=HighStreet&from_doc=' + vm.fd_page + '&size='+ vm.size
-        //     if (typeof(filter) != "undefined") {
-        //         if (filter.length > 0) {
-        //             url = url + "&applied_filter=" + fltr
-        //             axios.get(url)
-        //                 .then((res) => {
-        //                     vm.list = []
-        //                     vm.list = vm.list.concat(res.data.data[0].products)
-        //                     fd = fd + 12
-        //                     vm.from_doc = fd
-        //                     vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-        //                     vm.fd_page = fd_page + 1
-        //                     vm.$nuxt.$router.replace('/pdlist?page='+ vm.fd_page)
-        //                 })
-        //         } else {
-        //             axios.get(url)
-        //                 .then((res) => {
-        //                     //callback(null, { products: res.data.data[0].products })
-        //                     vm.list = vm.list.concat(res.data.data[0].products)
-        //                     fd = fd + 12
-        //                     vm.from_doc = fd
-        //                     vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-        //                     vm.fd_page = fd_page + 1
-        //                     vm.$nuxt.$router.replace('/pdlist?page='+ vm.fd_page)
-        //                 })
-        //         }
-        //     } else {
-        //         axios.get(url)
-        //             .then((res) => {
-        //                 //callback(null, { products: res.data.data[0].products })
-        //                 vm.list = vm.list.concat(res.data.data[0].products)
-        //                 fd = fd + 12
-        //                 vm.from_doc = fd
-        //                 vm.$store.commit('setFromDoc',JSON.stringify(vm.from_doc))
-        //                 vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-        //                 vm.fd_page = vm.size/12
-        //                 vm.fd_page = vm.fd_page + 1
-        //                 //vm.$nuxt.$router.replace('?page='+ vm.fd_page)
-        //                 //window.scrollTo(0,window.$nuxt.$el.scrollHeight)
-        //             })
-        //     }
-        //      vm.$store.commit('setproductlist',JSON.stringify(vm.list))
-        //      window.localStorage.setItem('productlist', JSON.stringify(vm.list))
-        // },
     },
     created() {
         //console.log("infiite ")
@@ -851,7 +846,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 /*  .scrollparent {
     max-height: 1000px;
     overflow:hidden;
@@ -891,14 +886,15 @@ export default {
     margin: 0px;
   }
   .subcon  {
-    height: 350px;
-    width: 400px;
+    height: 360px;
+    width: 270px;
     position: relative;
     display: inline-flex;
     /*overflow-x: scroll;*/
   }
-  .subcon img {
-    height: 350px;
+  .subcon img { 
+    height: 360px;
+    /*width: 270px;*/
     /*width: 300px;*/
     padding: 10px;
   }
@@ -928,6 +924,9 @@ export default {
     background-color: grey;
     display: inline-block;
   }
+  .inline-block{
+    display: inline-block;
+  }
   .quantity{
     margin: 25px 0 25px 0;
   }
@@ -937,7 +936,7 @@ export default {
   .input-group__details{
     display: none;
   }
-    p.listing_price{
+  p.listing_price{
     margin-bottom: 2px !important;
   }
   p.title{
@@ -981,17 +980,183 @@ export default {
     padding: 25px;
     overflow: hidden;
   }
-  .dialogCard div , .dialogCard img {
+
+  .dialogCard .breadcrumbs{
+    justify-content: start;
+    padding: 0px;
+  } 
+  .label_title{
+    font-size: 20px !important;
+    line-height: 1.5;
+    text-align: left;
+    color: #47525f;
+  }
+  .label_brand{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-family: Roboto;
+    font-size: 14px !important;
+    font-weight: bold;
+    line-height: 1.43;
+    text-align: left;
+    color: #47525f; 
+  }
+  .label_price{
+    margin-top: 10px;
+    font-family: Roboto;
+    font-size: 20px !important;
+    font-weight: bold;
+    line-height: 2;
+    text-align: left;
+    color: #47525f;
+  }
+  .price_fav_block{
+    position: relative;
     margin-bottom: 20px; 
+  }
+  .fav_block{
+    float: right;
   }
   .inlineradio{
     display: inline-flex;
     padding: 0 !important;
+  }
+  .size .input-group__input, .color .input-group__input{
+    visibility: hidden;
+  }
+  .size .input-group--selection-controls label{
+    background-color: #eaebf0;
+  }
+  .label_part{
+    font-family: Roboto;
+    font-size: 14px;
+    line-height: 1.43;
+    text-align: left;
+    color: #47525f;
+  }
+  .label_part.size{
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+  .label_part.color{
+    margin-bottom: 10px;
   }
   .fix{
     position: fixed;
   }
   .already .card {
     margin-bottom: 0px !important;
+  }
+    .quantity div{
+    margin: 10px 10px 0px 10px;
+    position: relative;
+    height: 40px;
+    width: 40px;
+    padding: 12px;
+    font-size: 14px;
+    background-color: #eaebf0;
+    display: inline-block;
+  }
+  .quantity{
+    margin: 20px 0 20px 0;
+  }
+    .sizeGuide{
+    margin-top: 20px;
+  }
+  .sizeGuide a {
+    font-size: 12px;
+    line-height: 1.67;
+    text-align: left;
+    color: #47525f;
+  }
+  .addtocart{
+     /*width: 335px;*/
+     height: 60px;
+  }
+    .Share-with-a-friend {
+  width: 151px;
+  height: 40px;
+  font-family: Roboto;
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+  margin: auto;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 2.22;
+  text-align: center;
+  color: #47525f;
+}
+.shareicons {
+  width: 40px;
+  height: 40px;
+}
+.at{
+  padding:6px;
+}
+.smallImg_container{
+  height: 600px;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+.small_img{
+   width: 60px;
+   height: 80px;
+}
+.web_img_container{
+  display: inline-block;
+}
+.web_img{
+    /*max-width: 100%;*/
+    width: 420px;
+    /*height:auto;*/
+    height: 560px;
+    /*padding: 10px 20px 10px 20px;*/
+    margin-right: 40px;
+    margin-left: 20px;
+  }
+  .web_product{
+    margin-top: 20px !important;
+    max-width: 986px;
+    margin: auto;
+  }
+    .web_productData .price{
+    margin-top: 20px;
+    /*margin-bottom: 20px;*/
+    font-size: 20px !important;
+
+  }
+  .web_productData .brand,
+  .web_productData .headline{
+    margin-bottom: 10px;
+    color: #47525f;
+    font-size: 20px !important;
+  }
+  .web_productData .brand{
+    font-size: 14px !important;
+  }
+  .product_card{
+    cursor: pointer;
+    margin-right: 20px;
+    box-shadow: none;
+  }
+  .product_data .label_brand,.product_data .label_title{
+    font-family: Roboto;
+    margin-bottom: 5px;
+    font-size: 12px !important;
+    line-height: 1.5;
+    text-align: left;
+    color: #47525f; 
+  }
+  .product_data .label_price {
+    font-family: Roboto;
+    font-size: 14px !important;
+    font-weight: bold;
+    line-height: 1.14;
+    text-align: left;
+    color: #47525f;
+  }
+  .pdlist_main{
+    /*max-width: 780px;*/
+    /*margin:auto;*/
   }
 </style>

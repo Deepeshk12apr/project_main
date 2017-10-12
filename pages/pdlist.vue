@@ -1,7 +1,8 @@
 <template>
-<v-layout column >
-<p>{{loadfilter}}</p>          
-    <v-dialog class="hidden-md-and-up" persistent v-model="dialog" fullscreen transition="dialog-bottom-transition" :overlay=false>
+    <v-layout column>
+    
+    <p>{{loadfilter}}</p>          
+    <v-dialog class="hidden-md-and-up" persistent v-model="dialog" fullscreen :overlay=false>
         <v-card >
             <v-toolbar dark  class="primary">
                 <v-btn icon @click.native="dialog = false" dark>
@@ -43,61 +44,85 @@
             </div>
         </v-card>
     </v-dialog>
-      <div v-if="filters" ></div>
-      <v-layout row  class="scroll">
-          <v-flex md3 lg3 offset-md1 offset-lg1 class="hidden-sm-and-down">
+    <v-dialog v-model="brand_dialog" persistent width="800px">
+     <!--  <v-card>
+       <v-flex xs4 row v-for="(brand,i) in filters.brand">
+              <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox>
+       </v-flex>
+      </v-card> -->
+      <v-card class="dialogBrand">
+      <v-container fluid v-bind="{ [`grid-list-4`]: true }">
+          <v-layout row wrap>
+            <v-flex
+              xs4
+              v-for="(brand,i) in filters.brand"
+            >
+            <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox>
+            </v-flex>            
+          </v-layout>
+          <v-btn>clear</v-btn>
+          <v-btn>apply filter</v-btn>
+          <v-btn @click.native="brand_dialog = !brand_dialog"></v-btn>
+        </v-container>
+        </v-card>
+    </v-dialog>
+    <div v-if="filters" ></div>
+    <v-layout row  class="scroll_pdlist">
+          <v-flex id="filter_Panel" md2 lg2 offset-md1 offset-lg1 class="hidden-sm-and-down">
+              <p class="filterlabel">&#9472&#9472 STYLE</p>
+              <div class="maincategory" v-for="styl in filters.style">                                  
+                  <v-checkbox :label="styl.key" @change = "applyfilter" v-model="style" :value="styl.key"></v-checkbox>
+              </div>
               <p>Brand</p>
-              <div class="maincategory" v-for="(brand,i) in filters.brand">
-                  <!-- <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox> -->
-                  <div v-if="i<5">
-                      <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox>
-                  </div>
-                  <div v-else>
-                      <v-checkbox class="color hidden" :label="brand.key" v-model="brands" :value="brand.key"></v-checkbox>
-                      <div v-if="isShowmore(i,filters.brand)">
-                          <a @click="showcolor()"> + {{filters.brand.length - 5}} more </a>
-                      </div>
-                  </div>
+              <div class="filter_container">               
+                <div class="maincategory" v-for="(brand,i) in filters.brand">                 
+                    <div v-if="i<5">
+                        <v-checkbox :label="brand.key" @change = "applyfilter" v-model="brands" :value="brand.key"></v-checkbox>
+                    </div>
+                    <div v-else>
+                        <v-checkbox class="brandfilter hidden" :label="brand.key" v-model="brands" :value="brand.key"></v-checkbox>
+                        <div v-if="isShowmore(i,filters.brand)">
+                            <a @click="showbrands()"> + {{filters.brand.length - 5}} more </a>
+                        </div>
+                    </div>
+                </div>
               </div>
               <p>Color</p>
+              <div class="filter_container">
               <div class="maincategory" v-for="(color,i) in filters.color">
                   <div v-if="i<5">
                       <v-checkbox :label="color.key" v-model="colors" :value="color.key"></v-checkbox>
                   </div>
                   <div v-else>
-                      <v-checkbox class="color hidden" :label="color.key" v-model="colors" :value="color.key"></v-checkbox>
+                      <v-checkbox class="colorfilter hidden" :label="color.key" v-model="colors" :value="color.key"></v-checkbox>
                       <div v-if="isShowmore(i,filters.color)">
                           <a @click="showcolor()"> + {{filters.color.length - 5}} more </a>
                       </div>
                   </div>
               </div>
-              <!-- <p>Discount</p>
-              <p>{{filters.discount}}</p>
-              <div class="maincategory" v-for="dist in filters.discount">
-                  <p>{{dist}}</p>
-                  <v-checkbox :label="dist.key" @change = "applyfilter" v-model="discount" :value="dist.key"></v-checkbox>
-              </div> -->
-              <p>Dress Length</p>
-              <!-- <p>{{filters.dress_length}}</p> -->
-              <div class="maincategory" v-for="dl in filters.dress_length">
-                  <!-- <p>{{dl}}</p> -->
-                  <v-checkbox :label="dl.key" @change = "applyfilter" v-model="dress_length" :value="dl.key"></v-checkbox>
               </div>
-              <!-- <p>Price</p>
-              <p>{{filters.listing_price}}</p>
-              <div class="maincategory" v-for="price in filters.listing_price">
-                  <p>{{price}}</p>                  
-                  <v-checkbox :label="price.from ||0 +' to '+ price.to  " @change = "applyfilter" v-model="listing_price" :value="price.key"></v-checkbox>
+              <div class="filter_container">
+              <p>Discount</p>              
+              <div class="maincategory" v-for="dist in filters.discountpercent">                  
+                  <v-checkbox :label="dist" @change = "applyfilter" v-model="discount" :value="dist"></v-checkbox>
+              </div>
+              </div>
+              <!-- <p>Dress Length</p> -->
+              <!-- <p>{{filters.dress_length}}</p> -->
+              <!-- <div class="maincategory" v-for="dl in filters.dress_length">                  
+                  <v-checkbox :label="dl.key" @change = "applyfilter" v-model="dress_length" :value="dl.key"></v-checkbox>
               </div> -->
-              <p>Style</p>
-              <div class="maincategory" v-for="styl in filters.style">                                  
-                  <v-checkbox :label="styl.key" @change = "applyfilter" v-model="style" :value="styl.key"></v-checkbox>
+              <p>Price</p>              
+              <div class="maincategory" v-for="price in filters.price">
+                  <!-- <p>{{price}}</p>                   -->
+                  <v-checkbox :label="price" @change = "applyfilter" v-model="listing_price" :value="price"></v-checkbox>
               </div>
           </v-flex>
-           <v-flex sm12 xs12 md9>
+           <v-flex  offset >
+                <div class="hidden-sm-and-down top-banner"></div>
                 <v-layout class="inline" row wrap >
                 <v-btn primary dark  @click.native="openfilters()" class= "hidden-md-and-up filterbtn">Filters</v-btn>
-                    <div >
+                    <div class="pdlist_comp">
                        <no-ssr>                    
                           <product-list-mob-paged></product-list-mob-paged>          
                        </no-ssr>                      
@@ -112,7 +137,7 @@
 </template>
 
 <script>
-import ProductListPage from '../components/product-list-page.vue'
+// import ProductListPage from '../components/product-list-page.vue'
 import ProductListMobPaged from '../components/product-list-mob-paged.vue'
 import eventHub from '~plugins/event-hub' 
 import NoSSR from 'vue-no-ssr'
@@ -133,7 +158,8 @@ export default {
     data() {
         return {
             filters:{},
-            dialog: false,            
+            dialog: false,   
+            brand_dialog:false,         
             position:0,
             brands: [],
             category: [],
@@ -167,6 +193,8 @@ export default {
                console.log(res.data.data[0])
                 console.log(res.data.data[0])
                 vm.filters = res.data.data[0]
+                vm.filters.price = Object.keys(res.data.data[0].listing_price) 
+                vm.filters.discountpercent = Object.keys(res.data.data[0].discount)                
                 
             })
           },
@@ -176,6 +204,9 @@ export default {
           eventHub.$on('updatefiler', this.updatefilter)
     },
     methods: {
+          alert:function(){
+            alert('scrolled')
+          },
           updatefilter :function(name){
             let vm = this
             let url =  'http://52.52.8.87/api/v2/catalogue/filters/?applied_filter={"parent_category_name":["'+ name +'"]}'
@@ -267,7 +298,7 @@ export default {
             }
         },
         showcolor() {
-            let elArr = document.getElementsByClassName("color")
+            let elArr = document.getElementsByClassName("colorfilter")
             for (let i = 0; i < elArr.length; i++) {
                 if (elArr[i].classList.contains("hidden")) {
                     elArr[i].classList.remove('hidden')
@@ -275,6 +306,17 @@ export default {
                     elArr[i].classList.add('hidden')
                 }
             }
+        },
+        showbrands() {
+            this.brand_dialog = true
+            // let elArr = document.getElementsByClassName("brandfilter")
+            // for (let i = 0; i < elArr.length; i++) {
+            //     if (elArr[i].classList.contains("hidden")) {
+            //         elArr[i].classList.remove('hidden')
+            //     } else {
+            //         elArr[i].classList.add('hidden')
+            //     }
+            // }
         }
     },
     created(){
@@ -284,8 +326,7 @@ export default {
     },
     // layout:['search'],
     components: { 
-    	productListMobPaged : ProductListMobPaged,
-    	productListPage : ProductListPage,
+    	productListMobPaged : ProductListMobPaged,    	
     	'no-ssr': NoSSR },
     scrollToTop: true,
     middleware: ['infinitscroll', 'authlogin','filter']
@@ -293,7 +334,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 /*  .scrollparent{
     max-height: 100%;
     overflow: hidden;
@@ -306,7 +347,8 @@ export default {
     margin-left: 25px;
   }
   .maincategory .checkbox{
-    margin-left: 25px;
+    /*margin-left: 25px;*/
+    margin: 0px !important;
   }
   .faded {
     /*background-color: grey;*/
@@ -329,4 +371,41 @@ export default {
     margin-bottom: 40%;
     position: fixed !important;
   }
+  .overlay--active{
+    display: none;
+  }
+  .fixed{
+    position: fixed;
+  }
+  .filterlabel{
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 1px;
+    text-align: left;
+    color: #47525f;
+  }
+  .top-banner {
+  margin: auto;
+  width: 780px;
+  height: 260px;
+  background-color: #e65b72;
+  margin-bottom: 90Px !important;
+}
+.filter_container{
+  height: 200px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+@media only screen and (min-width: 1024px){
+    .pdlist_comp{
+    width: 780px;
+    margin: auto;
+  }
+}
+
+.dialogBrand .input-group{
+ margin: 0px;
+}
 </style>

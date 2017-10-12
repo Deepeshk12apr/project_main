@@ -26,14 +26,14 @@ module.exports = {
     // With options
     ['@nuxtjs/component-cache', { maxAge: 1000 * 60 * 60 }],
   ],
-   render: {
+   // render: {
     // bundleRenderer: {
     //   cache: require('lru-cache')({
     //     max: 1000,
     //     maxAge: 1000 * 60 * 15
     //   })
     // }
-  },
+  // },
   router :{
 
     routes: [
@@ -62,6 +62,7 @@ module.exports = {
     vendor: ['vuetify','vue-touch','vue-scroll','vue-clipboard2','~/mixins/myMixin']
   },
   plugins: ['~plugins/vuetify.js','~plugins/event-hub.js',
+              '~plugins/filters.js',
             { src: '~/plugins/vue-touch', ssr: false },
             { src: '~/plugins/vue-scroll', ssr: false },
             { src: '~/plugins/vue-clipboard2', ssr: false }],

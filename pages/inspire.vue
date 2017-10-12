@@ -1,7 +1,13 @@
 <template>
-  <section class="container">
-    {{$store.state.cart}}
-  </section>
+<main>
+ <v-btn @click.native="pop">click for pop-up</v-btn> 
+ <v-dialog v-model="brand_dialog"  lazy absolute >
+    <v-card>
+      <h2>Deepesh</h2>
+    </v-card>
+ </v-dialog> 
+</main>
+ 
 </template>
 
 <style scoped>
@@ -15,34 +21,26 @@
 
 import axios from 'axios'
 
-const api = `https://swapi-json-server-nvaxelgbew.now.sh/people`
-
   export default {
-    // asyncData({store}){
-    //   return axios.get('http://52.52.8.87/api/v2/cart', { headers: { Authorization: 'Token a2fcea0ff9119e872bcba56e309c466503b291f1' } }).then((res) => ({
-    //       console.log(store.getter)
-    //       people: res.data.data[0].items.discounted_price
-    //   }))
-    // }
-    fetch ({ store, params }) {
-      console.log( 'Token is here -------------' + store.state.token)
-      console.log(store.getters.getToken.toString())
-      let config = { Authorization : store.getters.getToken.toString() } 
-      //let config = {'Authorization': 'Token a2fcea0ff9119e872bcba56e309c466503b291f1' };
-      let header = { headers: config }
-      let token = store.state.token
-      console.log(token + 'from $store')
-      //console.log(JSON.parse(config.toString()))
-      return axios.get('http://52.52.8.87/api/v2/cart',{ headers: config }  )
-      .then((res) => {
-          console.log(res.data)
-          store.commit('updateCart', res.data.data)
-      })
-      .catch((e) => {
-              console.log(e)
-            })
+data () {
+      return {
+        tabs: ['tab-1', 'tab-2', 'tab-3'],
+        active: null,
+        brand_dialog: false,
+        text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+      }
     },
-    middleware : ['authlogin','cart']
-
+    methods: {
+      pop(){
+        this.brand_dialog = true
+      },
+      next () {
+        console.log(this.active)
+        this.active = this.tabs[(this.tabs.indexOf(this.active) + 1) % this.tabs.length]
+        console.log(this.active)
+      }
+    },
+    middleware : ['authlogin','cart'],
+     layout:['search']
   }
 </script>

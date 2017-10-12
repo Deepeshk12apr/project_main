@@ -218,12 +218,11 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
     overflow-y: scroll;
     padding-right: -10px;
   }*/
-    p.listing_price{
+/*    p.listing_price{
     margin-bottom: 2px !important;
   }
   p.title{
     white-space: nowrap;
-    /*overflow: hidden !important;*/
   }
   .product_data{
     overflow-x: hidden;
@@ -256,7 +255,6 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
   }
   .dimg {
     height: 300px;
-    /*width: 400px;*/
   }
   .dialogCard {
     padding: 25px;
@@ -271,5 +269,5 @@ import { setfrom_doc, getfrom_docFromLocalStorage, getfrom_docFromCookie} from '
   }
   .fix{
     position: fixed;
-  }
+  }*/
 </style>

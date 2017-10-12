@@ -1,5 +1,5 @@
 <template>
-  <v-app toolbar footer @scroll="handleScroll">
+  <v-app toolbar footer @scroll.native="handleScroll">
     <v-navigation-drawer class="hidden-md-and-up"
        temporary
       :mini-variant="miniVariant"
@@ -50,7 +50,9 @@
           </router-link> -->
         
         <v-list>
-          <v-list-tile>
+          <v-list-tile
+            to='/register'
+            >
           <v-list-tile-action>
               <v-icon> account_box </v-icon>
             </v-list-tile-action>
@@ -201,7 +203,7 @@
     </v-toolbar>
 
 
-    <main>
+    <main id="scrolling-techniques">
       <v-container class="container" fluid>
         <nuxt />
       </v-container>

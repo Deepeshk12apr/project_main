@@ -1,5 +1,11 @@
 <template>
    <main class="pdlist_main">
+    <v-snackbar
+      :timeout="timeout"
+      :color="snackcolor"
+      v-model="snackbar"
+    > {{snacktext}} <v-btn dark flat @click.native="snackbar = false">Close</v-btn>
+    </v-snackbar>
       <div   class="loader"  v-if="list.length > 0">
       </div>
       <div v-else>
@@ -22,7 +28,7 @@
                   <div class="product_data">
                      <p class="label_brand">{{product.brand | capitalize}}</p>
                      <p class="label_title">{{product.title}}</p>
-                     <p class= "listing_price"><b>&#8377 {{removeDecimal(product.listing_price)}}</b></p>
+                     <p class= "listing_price"><b>&#8377 {{product.listing_price}}</b></p>
                   </div>
                   
                </v-card>
@@ -218,6 +224,7 @@
 import axios from 'axios'
 import eventHub from '~plugins/event-hub'
 import filters from '~plugins/filters'
+import Raven from '~plugins/Raven'
 import NoSSR from 'vue-no-ssr'
 import InfiniteLoading from './InfiniteLoading.vue'
 import { inc , dec } from '../utils/commonFunction'
@@ -239,17 +246,24 @@ import {
 
 export default {
 
-    asyncData ({ params, store },callback) {
-    let config = { Authorization : store.getters.getToken.toString() }
-    let url = "http://52.52.8.87/api/v2/user/love/"
-    console.log('asyncData')
-   return  axios.get(url, { headers: config })
-    .then((res) => {
-        //console.log(JSON.stringify(response.data.data[0].data))     
-        callback(null, { 
-          lovelist: response.data.data[0].data
-        })   
-      })
+    asyncData({
+        params,
+        store
+    }, callback) {
+        let config = {
+            Authorization: store.getters.getToken.toString()
+        }
+        let url = "http://apidev.zapyle.com/api/v2/user/love/"
+        console.log('asyncData')
+        return axios.get(url, {
+                headers: config
+            })
+            .then((res) => {
+                //console.log(JSON.stringify(response.data.data[0].data))     
+                callback(null, {
+                    lovelist: response.data.data[0].data
+                })
+            })
     },
     // filters: {
     //   capitalize: function (value) {
@@ -262,14 +276,14 @@ export default {
         return {
             list: [],
             //lovelist:[],
-            bcItems:[],
+            bcItems: [],
             love: null,
             quantity: 1,
             from_doc: 0,
-            colors:'',
+            colors: '',
             loading: true,
-            dialog:false,
-            transition:null,
+            dialog: false,
+            transition: null,
             dialog_mob: false,
             active: false,
             dproduct: null,
@@ -283,71 +297,96 @@ export default {
             productSize: null,
             offsetTop: 0,
             imgCounter: 0,
-            noProductsFound : false,
-            dproductloading: true
+            noProductsFound: false,
+            dproductloading: true,
+            timeout: 4000,
+            snacktext: '',
+            snackcolor: '',
+            snackbar: false,
+            previousScroll: 0
         }
     },
-    computed :{
-      gettransition: function(){
-        let width = window.screen.width
-        if(width >= 1024){
-          this.transition = 'fade-transition'
-        } else {
-          this.transition = 'dialog-bottom-transition'
+    computed: {
+        gettransition: function() {
+            let width = window.screen.width
+            if (width >= 1024) {
+                this.transition = 'fade-transition'
+            } else {
+                this.transition = 'dialog-bottom-transition'
+            }
+            return this.transition
+
         }
-        return this.transition
-        
-      }
     },
     methods: {
-      geturl : function(){
-          let url = " document.URL"
-          alert(url)
-          return url
-      },
-      onCopy:function(e){        
-        alert("coupon code coipied")
-      },
-      togglelove : function(pid){
+        bringmenu: function() {
+            var currentScroll = document.documentElement.scrollTop
 
-        this.love = ! this.love
+            if (currentScroll > this.previousScroll) {
+                console.log('down')
+                document.getElementById('filter_toolbar').style.top = "-20%"
+            } else {
+                console.log('up')
+                document.getElementById('filter_toolbar').style.top = "0"
+            }
+            this.previousScroll = currentScroll
+        },
+        geturl: function() {
+            let url = " document.URL"
+            alert(url)
+            return url
+        },
+        onCopy: function(e) {
+            alert("coupon code coipied")
+        },
+        togglelove: function(pid) {
 
-        let vm = this
-        let url = "http://52.52.8.87/api/v2/user/love/" + pid
-        let config = { Authorization : this.$store.getters.getToken.toString() } 
-        axios.get(url, { headers: config } )
-        .then(response => {
-              console.log(response.data.data[0].data)
-              let result = response.data.data[0].data == 'Loved' ? true : false
-             // vm.$router.go()
-              // vm.love = result
-              // vm.islove()
-            })
-      },
-      islove : function(pid){
-        let vm = this
-        let val = null
-        let url = "http://52.52.8.87/api/v2/user/love/"
-        let config = { Authorization : this.$store.getters.getToken.toString() }
-        axios.get(url, { headers: config } )
-        .then(response => {
-           console.log(JSON.stringify(response.data.data[0].data))
-           let p = response.data.data[0].data.filter(function(obj){
-              return obj.id == 104
-            })
-          if(p.length){
-            val = true
-          } else {
-             val = false
-          }
-        })
+            this.love = !this.love
 
-        return val
-          
-      },
-      changeImg:function(img){ 
-          document.getElementById('p_img').src = img; 
-      },     
+            let vm = this
+            let url = "http://apidev.zapyle.com/api/v2/user/love/" + pid
+            let config = {
+                Authorization: this.$store.getters.getToken.toString()
+            }
+            axios.get(url, {
+                    headers: config
+                })
+                .then(response => {
+                    console.log(response.data.data[0].data)
+                    let result = response.data.data[0].data == 'Loved' ? true : false
+                    // vm.$router.go()
+                    // vm.love = result
+                    // vm.islove()
+                })
+        },
+        islove: function(pid) {
+            let vm = this
+            let val = null
+            let url = "http://apidev.zapyle.com/api/v2/user/love/"
+            let config = {
+                Authorization: this.$store.getters.getToken.toString()
+            }
+            axios.get(url, {
+                    headers: config
+                })
+                .then(response => {
+                    console.log(JSON.stringify(response.data.data[0].data))
+                    let p = response.data.data[0].data.filter(function(obj) {
+                        return obj.id == 104
+                    })
+                    if (p.length) {
+                        val = true
+                    } else {
+                        val = false
+                    }
+                })
+
+            return val
+
+        },
+        changeImg: function(img) {
+            document.getElementById('p_img').src = img;
+        },
         inc: function(sizearr) {
             let vm = this
             if (vm.productSize == null) {
@@ -382,7 +421,7 @@ export default {
         quantityUpdate: function(quantity, itemid) {
             console.log("itemid is " + itemid)
             let vm = this
-            let url = 'http://52.52.8.87/api/v2/cart/' + itemid + '/'
+            let url = 'http://apidev.zapyle.com/api/v2/cart/' + itemid + '/'
             axios.put(url, {
                     "quantity": quantity
                 }, {
@@ -427,79 +466,86 @@ export default {
             this.dialog_mob = true
             this.dproduct = product
 
-            
+
             console.log(this.dproduct)
         },
         removeDecimal(val) {
             return val.substring(0, val.indexOf('.'));
         },
         repostionScroll() {
-          let pos = window.localStorage.scrollY
-          let data = window.localStorage.productlist
-          console.log(JSON.parse(data))
-          this.list = JSON.parse(data)
-           // let currpos = window.scrollY
-           //alert(pos + " and " + currpos)
-          console.log("pos from close dialog" + pos)
-          window.scrollTo(0,pos - 100)
+            let pos = window.localStorage.scrollY
+            let data = window.localStorage.productlist
+            console.log(JSON.parse(data))
+            this.list = JSON.parse(data)
+            // let currpos = window.scrollY
+            //alert(pos + " and " + currpos)
+            console.log("pos from close dialog" + pos)
+            window.scrollTo(0, pos - 100)
         },
-        closedialog: function(){
+        closedialog: function() {
 
-          let pos = window.localStorage.scrollY  
-          window.scrollTo(0,pos)
-          //this.$router.push('pdlist',this.repostionScroll) 
-          //this.$router.go(-1)
-          this.dialog_mob = false
-          //          
+            let pos = window.localStorage.scrollY
+            window.scrollTo(0, pos)
+            //this.$router.push('pdlist',this.repostionScroll) 
+            //this.$router.go(-1)
+            var el = document.getElementsByClassName('overlay')
+            if (el && el.length > 0) {
+                if (el[0].classList.contains("overlay--active")) {
+                    el[0].classList.remove('overlay--active')
+                }
+            }
+            this.dialog_mob = false
+            //          
         },
-        indivisualproduct: function(product){
+        indivisualproduct: function(product) {
 
-          if(this.$store.getters.getToken.split('Token')[1].trim() == 'null'){
-            this.redirectcardviacache(product)
-          } else {
-            this.redirectcard(product)
-          }
+            if (this.$store.getters.getToken.split('Token')[1].trim() == 'null') {
+                this.redirectcardviacache(product)
+            } else {
+                this.redirectcard(product)
+            }
 
         },
-        redirectcardviacache:function(product) {
-            
+        redirectcardviacache: function(product) {
+
             let position = window.scrollY
             console.log("window.scrollY" + window.scrollY)
             window.localStorage.setItem('scrollY', position)
             delete window.$nuxt.$route.query['pid']
-            let str=''
-            let obj= window.$nuxt.$route.query            
-            for(var i in obj){
-              str += i + '=' + obj[i]
-              str= '&' + str
+            let str = ''
+            let obj = window.$nuxt.$route.query
+            for (var i in obj) {
+                str += i + '=' + obj[i]
+                str = '&' + str
             }
             //let query = '/pdlist?'+this.$nuxt.$route.fullPath.split('?')[1] +'&pid=' + product.id
             let query = '/pdlist?pid=' + product.id + str
             this.$nuxt.$router.replace(query)
             this.dproduct = product
-            this.dialog_mob = true         
+            this.dialog_mob = true
         },
         redirectcard: function(product) {
             //this.$nuxt.$router.replace('?pid=' + product.id)
-            this.dproduct = product             
+            this.dproduct = product
             let position = window.scrollY
             console.log("window.scrollY" + window.scrollY)
             window.localStorage.setItem('scrollY', position)
 
             delete this.$route.query['pid']
-            let str='', strarr = []
-            let obj= window.$nuxt.$route.query 
+            let str = '',
+                strarr = []
+            let obj = window.$nuxt.$route.query
             let objkeys = Object.keys(obj)
             let objvalues = Object.values(obj)
 
             this.bcItems = []
-            this.bcItems.push('Discover')            
+            this.bcItems.push('Discover')
             //this.bcItems.push(objkeys)
             let vm = this
 
-            objkeys.forEach(function(value,i){
-              vm.bcItems.push(objvalues[i])
-              strarr[i]= value + '=' + objvalues[i]
+            objkeys.forEach(function(value, i) {
+                vm.bcItems.push(objvalues[i])
+                strarr[i] = value + '=' + objvalues[i]
             })
             str = '&' + strarr.join('&')
             // for(var i in obj){             
@@ -507,16 +553,24 @@ export default {
             //   str= '&' + str                          
             // }
             //let query = '/pdlist?'+this.$nuxt.$route.fullPath.split('?')[1] +'&pid=' + product.id
-            let query = '/pdlist?pid=' + product.id + str
+            let query = '/pdlist?pid=' + product.product_attr_id + str
             this.$nuxt.$router.replace(query)
             // let vm =  this
-            let config = { Authorization : vm.$store.getters.getToken.toString() }
-            axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+ product.id}`, { headers: config } )
+            let config = {
+                Authorization: vm.$store.getters.getToken.toString()
+            }
+            axios.get(`http://apidev.zapyle.com/api/v2/catalogue/product/${+ product.product_attr_id}`, {
+                    headers: config
+                })
                 .then((res) => {
                     console.log(res.data.data[0].products)
                     //vm.dproductloading = false
                     //vm.dproduct = res.data.data[0].products
                     vm.love = res.data.data[0].products.is_loved
+                })
+                .catch((e) => {
+
+                    console.log(e.message)
                 })
 
             //this.dproduct = product
@@ -526,22 +580,27 @@ export default {
             let vm = this
             vm.dialog_mob = true
             //alert(pid)
-            this.bcItems.push('Discover') 
-            let obj= window.$nuxt.$route.query 
+            this.bcItems.push('Discover')
+            let obj = window.$nuxt.$route.query
             let objvalues = Object.values(obj)
-            delete objvalues[0  ]
-            objvalues.forEach(function(value,i){
-              vm.bcItems.push(value)             
+            delete objvalues[0]
+            objvalues.forEach(function(value, i) {
+                vm.bcItems.push(value)
             })
 
-            let config = { Authorization : vm.$store.getters.getToken.toString() }
-            axios.get(`http://52.52.8.87/api/v2/catalogue/product/${+pid}`, { headers: config } )
+            let config = {
+                Authorization: vm.$store.getters.getToken.toString()
+            }
+            axios.get(`http://apidev.zapyle.com/api/v2/catalogue/product/${+pid}`, {
+                    headers: config
+                })
                 .then((res) => {
                     console.log(res.data.data[0].products)
                     vm.dproduct = res.data.data[0].products
                     vm.love = res.data.data[0].products.is_loved
                 })
                 .catch((error) => {
+
                     console.log(error)
                     //error({ message: 'User not found', statusCode: 404 })
                 })
@@ -560,48 +619,48 @@ export default {
                     fltr = JSON.stringify(fltr)
                     console.log(fltr)
                 }
-                              // for(f in filter) {
-              //       let val = filter[f].join('","')
-              //       fltr[f]=val
-              //       fltr = JSON.stringify(fltr)
-              //       fltr = fltr + ','
-                    
-              //   }
-              //   console.log(fltr)
+                // for(f in filter) {
+                //       let val = filter[f].join('","')
+                //       fltr[f]=val
+                //       fltr = JSON.stringify(fltr)
+                //       fltr = fltr + ','
+
+                //   }
+                //   console.log(fltr)
             }
 
         },
-        viacategory : function(){
-          let q = vm.$nuxt.$route.query
-           return q.category
+        viacategory: function() {
+            let q = vm.$nuxt.$route.query
+            return q.category
         },
-        filterpanel: function(vm,filter) {
-          let fltr= ''
-          if (typeof(filter) != "undefined") {
-              fltr = '&applied_filter=' + JSON.stringify(filter)
+        filterpanel: function(vm, filter) {
+            let fltr = ''
+            if (typeof(filter) != "undefined") {
+                fltr = '&applied_filter=' + JSON.stringify(filter)
             }
             return filter
         },
         searchquery: function(vm) {
             let q = vm.$nuxt.$route.query
             let search = ''
-            if (q.search != undefined) {            
-              let val = q.search
+            if (q.search != undefined) {
+                let val = q.search
                 search = {
-                query: [val]
+                    query: [val]
                 }
 
-              //search = JSON.stringify(search)
-              console.log(search)
-              //search =  "&applied_filter=" + search
-              return search
+                //search = JSON.stringify(search)
+                console.log(search)
+                //search =  "&applied_filter=" + search
+                return search
             }
         },
 
         onInfinite: function(param) {
             //alert("infinite scroll")
             // if (window.screen.width <= 920) {
-              if (true) {
+            
 
                 let vm = this
                 let config = {
@@ -609,104 +668,93 @@ export default {
                 }
 
                 let q = vm.$nuxt.$route.query
-                  if (q.pid != undefined && vm.from_doc == 0) {
-                  vm.loaddialogdirectly(q.pid)
-                  }
+                if (q.pid != undefined && vm.from_doc == 0) {
+                    vm.loaddialogdirectly(q.pid)
+                }
 
                 let searchQuery = vm.searchquery(vm)
 
                 //get filter from store
                 let fltr = this.$store.getters.getfilter
-                let filterQuery 
-                if(fltr){
-                  if(Object.keys(fltr).length){
-                    filterQuery = vm.filterpanel(vm,fltr)                  
-                  } 
+                let filterQuery
+                if (fltr) {
+                    if (Object.keys(fltr).length) {
+                        filterQuery = vm.filterpanel(vm, fltr)
+                    }
                 }
 
-                if(param){
-                  this.from_doc = 0                  
-                } 
+                if (param) {
+                    this.from_doc = 0
+                }
 
-                let cat_query,sub_cat 
+                let cat_query, sub_cat
 
                 //category from query parameter
-                if(param != undefined && param !=true && this.from_doc == 0){
-                   cat_query = param.split('/')[0]
-                   sub_cat = param.split('/')[1]
+                if (param != undefined && param != true && this.from_doc == 0) {
+                    cat_query = param.split('/')[0]
+                    sub_cat = param.split('/')[1]
                 } else {
-                     cat_query = vm.$nuxt.$route.query.category
-                } 
+                    cat_query = vm.$nuxt.$route.query.category
+                }
 
-                  //
-                 let category = {"parent_category_name":[cat_query]}
-                 let sub_category = {"category":[sub_cat]}
-                 if(sub_category.category[0] != undefined && sub_category.category[0] != "undefined"){
-                  category = Object.assign(category,sub_category)
-                 }
+                //
+                let category = {
+                    "parent_category_name": [cat_query]
+                }
+                let sub_category = {
+                    "category": [sub_cat]
+                }
+                if (sub_category.category[0] != undefined && sub_category.category[0] != "undefined") {
+                    category = Object.assign(category, sub_category)
+                }
 
-                 console.log(category)
-                 
+                console.log(category)
+
                 let fd = this.from_doc
-                let url = 'http://52.52.8.87/api/v2/catalogue/elastic-products/'
+                let url = 'http://apidev.zapyle.com/api/v2/catalogue/elastic-products/'
                 let limits = '?from_doc=' + fd + '&size=' + vm.size
                 url = url + limits
 
-                // if(searchQuery || filterQuery){
-                  
-                // } 
 
-
-                if(searchQuery){
-                  if(searchQuery && filterQuery){                    
-                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(Object.assign(searchQuery,filterQuery)).replace(/\\/g, ""))
-                  }
-                  else if(searchQuery){
-                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(searchQuery))
-                  } 
-                } else if(Object.values(category.parent_category_name)[0] != undefined){
-                  if(category.parent_category_name && filterQuery != '{}' && filterQuery != undefined ){
-                  url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(Object.assign(category,filterQuery)).replace(/\\/g, ""))
-                  }else if(category.parent_category_name){
-                    url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(category))
-                  } 
+                if (searchQuery) {
+                    if (searchQuery && filterQuery) {
+                        url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(Object.assign(searchQuery, filterQuery)).replace(/\\/g, ""))
+                    } else if (searchQuery) {
+                        url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(searchQuery))
+                    }
+                } else if (Object.values(category.parent_category_name)[0] != undefined) {
+                    if (category.parent_category_name && filterQuery != '{}' && filterQuery != undefined) {
+                        url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(Object.assign(category, filterQuery)).replace(/\\/g, ""))
+                    } else if (category.parent_category_name) {
+                        url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(category))
+                    }
                 } else if (filterQuery) {
                     url = url + "&applied_filter=" + encodeURIComponent(JSON.stringify(filterQuery).replace(/\\/g, ""))
-                } else{
-                  url = url
+                } else {
+                    url = url
                 }
-                
-
-                // if(searchQuery)
-                // url = url + searchQuery
-                // if(filterQuery)
-                // url = url + filterQuery 
-                // if(category)
-                //  url = url +  category
-
-               
 
                 if (typeof(filterQuery) != "undefined") {
                     if (param) {
-                       // url = url + "&applied_filter=" + search
+                        // url = url + "&applied_filter=" + search
                         axios.get(url)
                             .then((res) => {
                                 vm.list = []
                                 //vm.list = vm.list.concat(res.data.data[0].products)
                                 let totalProduct = res.data.data[0].total_documents
                                 let productCount = res.data.data[0].products.length
-                                
-                                if(totalProduct == 0 ){
-                                  vm.noProductsFound = true
-                                  return
+
+                                if (totalProduct == 0) {
+                                    vm.noProductsFound = true
+                                    return
                                 }
 
-                                if(productCount){
-                                vm.list = vm.list.concat(res.data.data[0].products)
-                                fd = fd + 12
-                                vm.from_doc = fd
-                                vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-                              } 
+                                if (productCount) {
+                                    vm.list = vm.list.concat(res.data.data[0].products)
+                                    fd = fd + 12
+                                    vm.from_doc = fd
+                                    vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+                                }
 
                             })
                     } else {
@@ -715,21 +763,21 @@ export default {
                                 //callback(null, { products: res.data.data[0].products })
                                 let totalProduct = res.data.data[0].total_documents
                                 let productCount = res.data.data[0].products.length
-                                
-                                if(totalProduct == 0 ){
-                                  vm.noProductsFound = true
-                                  return
+
+                                if (totalProduct == 0) {
+                                    vm.noProductsFound = true
+                                    return
                                 }
 
-                                if(productCount){
-                                  vm.list = vm.list.concat(res.data.data[0].products)
-                                  fd = fd + 12
-                                  vm.from_doc = fd
-                                  vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');  
+                                if (productCount) {
+                                    vm.list = vm.list.concat(res.data.data[0].products)
+                                    fd = fd + 12
+                                    vm.from_doc = fd
+                                    vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
                                 } else {
-                                  // vm.noProductsFound = true
+                                    // vm.noProductsFound = true
                                 }
-                                
+
                                 //vm.fd_page = vm.fd_page + 1
                                 //window.localStorage.setItem('scrollY', window.scrollY)
                                 //vm.$nuxt.$router.replace('?page='+ vm.fd_page)
@@ -741,24 +789,29 @@ export default {
                             //callback(null, { products: res.data.data[0].products })
                             let totalProduct = res.data.data[0].total_documents
                             let productCount = res.data.data[0].products.length
-                            
-                            if(totalProduct == 0 ){
-                                  vm.noProductsFound = true
-                                  return
-                                }
 
-                            if(productCount){
-                              vm.list = vm.list.concat(res.data.data[0].products)
-                              fd = fd + 12
-                              vm.from_doc = fd
-                              vm.$store.commit('setFromDoc', JSON.stringify(vm.from_doc))
-                              vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');                              
-                            } 
+                            if (totalProduct == 0) {
+                                vm.noProductsFound = true
+                                return
+                            }
+
+                            if (productCount) {
+                                vm.list = vm.list.concat(res.data.data[0].products)
+                                fd = fd + 12
+                                vm.from_doc = fd
+                                vm.$store.commit('setFromDoc', JSON.stringify(vm.from_doc))
+                                vm.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded')
+                            }
                         })
+                        .catch((e) => {
+
+                            console.log(e.message)
+                        })
+
                 }
                 vm.$store.commit('setproductlist', JSON.stringify(vm.list))
                 window.localStorage.setItem('productlist', JSON.stringify(vm.list))
-            }
+            
         },
 
         addtoCart: function() {
@@ -766,13 +819,13 @@ export default {
 
             if (!vm.$store.state.islogged) {
                 if (vm.$store.getters.getToken.split('Token')[1].trim() == "null") {
-                    axios.get('http://52.52.8.87/api/v2/user/create-guest/')
+                    axios.get('http://apidev.zapyle.com/api/v2/user/create-guest/')
                         .then((res) => {
                             console.log(res.data.data[0].user.authentication_token)
                             let gt = res.data.data[0].user.authentication_token
                             vm.$store.commit('setGuestToken', res.data.data[0].user.authentication_token)
                             setguestToken(res.data.data[0].user.authentication_token)
-                            axios.post('http://52.52.8.87/api/v2/cart/', {
+                            axios.post('http://apidev.zapyle.com/api/v2/cart/', {
                                     "product": vm.productSize,
                                     "quantity": vm.quantity
                                 }, {
@@ -781,13 +834,24 @@ export default {
                                     }
                                 })
                                 .then((res) => {
-                                    vm.alertsuccess = true
+                                    // vm.alertsuccess = true
+                                    vm.snacktext = res.data.data[0].item
+                                    vm.snackbar = true
                                     console.log(res.data)
+                                })
+                                .catch((e) => {
+
+                                    console.log("error " + e.response.data.error.message)
+                                    vm.snacktext = e.response.data.error.message
+                                    vm.snackbar = true
+                                    alert(e.response.data.error.message)
+                                    if (e.response.data.error.code == 1002)
+                                        alert('eroor while adding to cart')
                                 })
                         })
                 } else {
                     console.log(vm.$store.getters.getToken)
-                    axios.post('http://52.52.8.87/api/v2/cart/', {
+                    axios.post('http://apidev.zapyle.com/api/v2/cart/', {
                             "product": vm.productSize,
                             "quantity": vm.quantity
                         }, {
@@ -797,10 +861,18 @@ export default {
                         })
                         .then((res) => {
                             console.log(res.data)
+                            vm.snacktext = res.data.data[0].item
+                            vm.snackcolor = 'red lighten-2'
+                            vm.snackbar = true
                             alert("item added to cart")
                         })
                         .catch((e) => {
+
                             console.log("error " + e.response.data.error.message)
+                            vm.snacktext = e.response.data.error.message
+                            vm.snackcolor = 'red lighten-2'
+                            vm.snackbar = true
+                            alert(e.response.data.error.message)
                             if (e.response.data.error.code == 1002)
                                 alert('eroor while adding to cart')
                         })
@@ -808,7 +880,7 @@ export default {
             }
             // for normal user
             else {
-                axios.post('http://52.52.8.87/api/v2/cart/', {
+                axios.post('http://apidev.zapyle.com/api/v2/cart/', {
                         "product": vm.productSize,
                         "quantity": vm.quantity
                     }, {
@@ -818,10 +890,15 @@ export default {
                     })
                     .then((res) => {
                         console.log(res.data)
-                        vm.alertsuccess = true
+                        vm.snacktext = res.data.data[0].item
+                        vm.snackbar = true
+
                     })
                     .catch((e) => {
+
                         console.log("error " + e.response.data.error.message)
+                        vm.snacktext = e.response.data.error.message
+                        vm.snackbar = true
                         if (e.response.data.error.code == 1002)
                             vm.dialog = true
                     })
@@ -832,7 +909,9 @@ export default {
         //console.log("infiite ")
         eventHub.$on('emitfilter', this.onInfinite)
         eventHub.$on('emitCategory', this.onInfinite)
-      
+
+        window.addEventListener('scroll', this.bringmenu)
+
         // console.log("Store value for scrollY" + window.localStorage.scrollY)
         // let cy = window.localStorage.scrollY
         // console.log(typeof(cy))

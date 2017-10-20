@@ -29,7 +29,9 @@
     "vue-touch": "^2.0.0-beta.4",
     "vue2-scrollbar": "0.0.3",
     "vuetify": "^0.13.0",
-    "vuex-persistedstate": "^2.0.0"
+    "vuex-persistedstate": "^2.0.0",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.1"
   },
   "devDependencies": {
     "less": "^2.7.2",
